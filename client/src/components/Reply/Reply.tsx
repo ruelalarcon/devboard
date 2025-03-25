@@ -19,7 +19,11 @@ interface ReplyProps {
   negativeRatings: number;
   level?: number;
   onReply: (replyId: string) => void;
-  onSubmitNestedReply?: (content: string, parentReplyId: string) => Promise<void>;
+  onSubmitNestedReply?: (
+    content: string,
+    parentReplyId: string,
+    file: File | null
+  ) => Promise<void>;
   children?: React.ReactNode;
 }
 
@@ -47,9 +51,9 @@ export function Reply({
     }
   };
 
-  const handleSubmitReply = async (content: string) => {
+  const handleSubmitReply = async (content: string, file: File | null) => {
     if (onSubmitNestedReply) {
-      await onSubmitNestedReply(content, id);
+      await onSubmitNestedReply(content, id, file);
       setShowReplyForm(false);
     }
   };
@@ -76,7 +80,11 @@ export function Reply({
 
         {showReplyForm && (
           <Box className={classes.replyForm}>
-            <ReplyForm onSubmit={handleSubmitReply} onCancel={() => setShowReplyForm(false)} />
+            <ReplyForm
+              onSubmit={handleSubmitReply}
+              onCancel={() => setShowReplyForm(false)}
+              placeholder="Write your reply to this comment..."
+            />
           </Box>
         )}
       </Box>

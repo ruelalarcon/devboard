@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import { Link, useParams } from 'react-router-dom';
 import {
   Alert,
@@ -18,12 +18,7 @@ import { AppShell } from '../components/AppShell';
 import { ContentCard } from '../components/ContentCard';
 import { Reply } from '../components/Reply';
 import { ReplyForm } from '../components/ReplyForm';
-import {
-  CREATE_REPLY,
-  GET_MESSAGE,
-  GET_NESTED_REPLIES,
-  GET_REPLIES_BY_MESSAGE,
-} from '../graphql/message';
+import { GET_MESSAGE, GET_NESTED_REPLIES, GET_REPLIES_BY_MESSAGE } from '../graphql/message';
 import { useContent } from '../hooks/useContent';
 import { useUserRatings } from '../hooks/useUserRatings';
 import { client } from '../lib/apolloClient';
@@ -68,8 +63,7 @@ export function MessageDetailPage() {
     skip: !id,
   });
 
-  const [_createReply, { loading: createLoading }] = useMutation(CREATE_REPLY);
-  const { addReply, replyLoading } = useContent({
+  const { addReply, isLoading: contentLoading } = useContent({
     contentId: id,
     contentType: 'message',
     onSuccess: () => refetchReplies(),
@@ -97,16 +91,19 @@ export function MessageDetailPage() {
     }
   };
 
-  const handleSubmitReply = async (content: string) => {
+  const handleSubmitReply = async (content: string, file: File | null) => {
     if (!id) {
       return;
     }
 
-    const success = await addReply(content, replyingTo || undefined);
+    const success = await addReply(content, file, replyingTo || undefined);
 
-    if (success && replyingTo) {
-      fetchNestedReplies(replyingTo);
-      setReplyingTo(null);
+    if (success) {
+      if (replyingTo) {
+        // Refetch nested replies if replying to a reply
+        fetchNestedReplies(replyingTo);
+        setReplyingTo(null);
+      }
     }
   };
 
@@ -114,8 +111,8 @@ export function MessageDetailPage() {
     setReplyingTo(replyId);
   };
 
-  const handleNestedReply = async (content: string, parentReplyId: string) => {
-    const success = await addReply(content, parentReplyId);
+  const handleNestedReply = async (content: string, parentReplyId: string, file: File | null) => {
+    const success = await addReply(content, file, parentReplyId);
 
     if (success) {
       fetchNestedReplies(parentReplyId);
@@ -198,6 +195,10 @@ export function MessageDetailPage() {
   const { message } = messageData;
   const replies = repliesData?.repliesByMessage || [];
 
+  const replyPlaceholder = replyingTo
+    ? 'Write your reply to this comment...'
+    : 'Write your reply...';
+
   return (
     <AppShell>
       <Container>
@@ -234,9 +235,10 @@ export function MessageDetailPage() {
         <Paper withBorder p="md" mb="xl">
           <ReplyForm
             onSubmit={handleSubmitReply}
-            onCancel={() => {}}
+            onCancel={replyingTo ? () => setReplyingTo(null) : undefined}
             initialContent=""
-            isLoading={createLoading || replyLoading}
+            isLoading={contentLoading}
+            placeholder={replyPlaceholder}
           />
         </Paper>
 

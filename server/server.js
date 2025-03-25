@@ -17,12 +17,21 @@ const path = require("path");
 const typeDefs = require("./graphql/schema");
 const resolvers = require("./graphql/resolvers");
 
+// Import routes
+const uploadRoutes = require("./routes/uploadRoutes");
+
 // Import database models
 const db = require("./models");
 
 // Create Express app
 const app = express();
 const httpServer = http.createServer(app);
+
+// Configure CORS
+const corsOptions = {
+  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  credentials: true,
+};
 
 // Configure session middleware
 app.use(
@@ -37,6 +46,15 @@ app.use(
     },
   })
 );
+
+// Apply JSON middleware for REST endpoints
+app.use(express.json());
+
+// Apply CORS
+app.use(cors(corsOptions));
+
+// Register REST API routes
+app.use("/api", uploadRoutes);
 
 // Serve static files (for screenshots/images)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -63,10 +81,6 @@ async function startServer() {
   // Apply Apollo middleware to Express app
   app.use(
     "/graphql",
-    cors({
-      origin: process.env.CLIENT_URL || "http://localhost:5173",
-      credentials: true,
-    }),
     express.json(),
     expressMiddleware(server, {
       context: async ({ req }) => {
@@ -100,6 +114,7 @@ async function startServer() {
   await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
   console.log(`Server running at http://localhost:${PORT}`);
   console.log(`GraphQL endpoint: http://localhost:${PORT}/graphql`);
+  console.log(`REST API endpoints available at http://localhost:${PORT}/api`);
 }
 
 // Handle errors

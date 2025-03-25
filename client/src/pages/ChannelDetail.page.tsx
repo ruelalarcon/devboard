@@ -2,26 +2,23 @@ import { useMutation, useQuery } from '@apollo/client';
 import { Link, useParams } from 'react-router-dom';
 import {
   Alert,
-  Avatar,
   Box,
   Button,
   Container,
-  Divider,
   Group,
   Loader,
   Paper,
   Stack,
   Text,
-  Textarea,
   Title,
 } from '@mantine/core';
-import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
 import { AppShell } from '../components/AppShell';
-import { RatingButtons } from '../components/RatingButtons';
+import { ContentCard } from '../components/ContentCard';
+import { ReplyForm } from '../components/ReplyForm';
 import { GET_CHANNEL } from '../graphql/channel';
 import { CREATE_MESSAGE, GET_MESSAGES_BY_CHANNEL } from '../graphql/message';
-import { formatDate, formatDateTime } from '../utils/dateUtils';
+import { useContent } from '../hooks/useContent';
+import { formatDate } from '../utils/dateUtils';
 
 interface Message {
   id: string;
@@ -59,56 +56,51 @@ export function ChannelDetailPage() {
     skip: !id,
   });
 
-  const [createMessage, { loading: createLoading }] = useMutation(CREATE_MESSAGE);
-
-  const form = useForm({
-    initialValues: {
-      content: '',
-    },
-    validate: {
-      content: (value) => (value.length < 1 ? 'Message cannot be empty' : null),
-    },
+  const [_createMessage, { loading: createLoading }] = useMutation(CREATE_MESSAGE);
+  const { addMessage, isLoading: contentLoading } = useContent({
+    contentType: 'channel',
+    onSuccess: () => refetchMessages(),
   });
 
-  const handleSubmit = async (values: typeof form.values) => {
+  const handleSubmit = async (content: string, file: File | null) => {
     if (!id) {
       return;
     }
 
-    try {
-      await createMessage({
-        variables: {
-          channelId: id,
-          content: values.content,
-        },
-      });
-      notifications.show({
-        title: 'Success',
-        message: 'Message posted successfully',
-        color: 'green',
-      });
-      form.reset();
-      refetchMessages();
-    } catch (error) {
-      notifications.show({
-        title: 'Error',
-        message: error instanceof Error ? error.message : 'Failed to post message',
-        color: 'red',
-      });
-    }
+    await addMessage(id, content, file);
   };
 
   const loading = channelLoading || messagesLoading;
   const error = channelError || messagesError;
 
   if (loading && !channelData) {
-    return <Loader />;
+    return (
+      <AppShell>
+        <Container>
+          <Loader />
+        </Container>
+      </AppShell>
+    );
   }
+
   if (error) {
-    return <Alert color="red">{error.message}</Alert>;
+    return (
+      <AppShell>
+        <Container>
+          <Alert color="red">{error.message}</Alert>
+        </Container>
+      </AppShell>
+    );
   }
+
   if (!channelData?.channel) {
-    return <Alert color="red">Channel not found</Alert>;
+    return (
+      <AppShell>
+        <Container>
+          <Alert color="red">Channel not found</Alert>
+        </Container>
+      </AppShell>
+    );
   }
 
   const { channel } = channelData;
@@ -136,19 +128,12 @@ export function ChannelDetailPage() {
         </Title>
 
         <Paper withBorder p="md" mb="xl">
-          <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Textarea
-              placeholder="Type your message here..."
-              minRows={3}
-              mb="md"
-              {...form.getInputProps('content')}
-            />
-            <Group justify="flex-end">
-              <Button type="submit" loading={createLoading}>
-                Post Message
-              </Button>
-            </Group>
-          </form>
+          <ReplyForm
+            onSubmit={handleSubmit}
+            initialContent=""
+            isLoading={createLoading || contentLoading}
+            placeholder="Type your message here..."
+          />
         </Paper>
 
         {messagesLoading ? (
@@ -160,45 +145,23 @@ export function ChannelDetailPage() {
         ) : (
           <Stack gap="lg">
             {messages.map((message: Message) => (
-              <Paper key={message.id} withBorder p="md" radius="md">
-                <Group gap="sm" mb="xs">
-                  <Avatar color="blue" radius="xl">
-                    {message.author.displayName[0]}
-                  </Avatar>
-                  <div>
-                    <Text fw={500}>{message.author.displayName}</Text>
-                    <Text size="xs" c="dimmed">
-                      {formatDateTime(message.createdAt)}
-                    </Text>
-                  </div>
-                </Group>
-
-                <Text>{message.content}</Text>
-
-                {message.screenshot && (
-                  <Box my="md">
-                    <img
-                      src={message.screenshot}
-                      alt="Screenshot"
-                      style={{ maxWidth: '100%', maxHeight: '300px' }}
-                    />
-                  </Box>
-                )}
-
-                <Divider my="sm" />
-
-                <Group justify="space-between">
-                  <RatingButtons
-                    contentId={message.id}
-                    contentType="message"
-                    positiveCount={message.positiveRatings}
-                    negativeCount={message.negativeRatings}
-                  />
+              <Box key={message.id}>
+                <ContentCard
+                  id={message.id}
+                  content={message.content}
+                  screenshot={message.screenshot}
+                  createdAt={message.createdAt}
+                  author={message.author}
+                  positiveRatings={message.positiveRatings}
+                  negativeRatings={message.negativeRatings}
+                  contentType="message"
+                  onRatingChange={() => {}}
+                >
                   <Button component={Link} to={`/message/${message.id}`} variant="subtle" size="xs">
                     View Replies
                   </Button>
-                </Group>
-              </Paper>
+                </ContentCard>
+              </Box>
             ))}
           </Stack>
         )}
