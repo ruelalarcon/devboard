@@ -127,7 +127,8 @@ export function ChannelDetailPage() {
           <Title order={2}>{channel.name}</Title>
           {channel.description && <Text mt="xs">{channel.description}</Text>}
           <Text size="sm" c="dimmed" mt="xs">
-            Created by {channel.creator.displayName} on {formatDate(channel.createdAt)}
+            Created by <Link to={`/user/${channel.creator.id}`}>{channel.creator.displayName}</Link>{' '}
+            on {formatDate(channel.createdAt)}
           </Text>
         </Paper>
 

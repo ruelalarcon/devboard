@@ -35,7 +35,12 @@ function Header({
       </Group>
       {user && (
         <Group>
-          <Text>Hello, {user.displayName}</Text>
+          <Text>
+            Hello,{' '}
+            <Link to={`/user/${user.id}`} style={{ textDecoration: 'none' }}>
+              {user.displayName}
+            </Link>
+          </Text>
           <Button onClick={onLogout} variant="outline" color="red" size="sm">
             Logout
           </Button>
@@ -83,6 +88,18 @@ export function AppShell({ children }: AppShellProps) {
             borderRadius: '.25rem',
           }}
         />
+        {user && (
+          <NavLink
+            label="My Profile"
+            component={Link}
+            to={`/user/${user.id}`}
+            active={location.pathname === `/user/${user.id}`}
+            style={{
+              borderRadius: '.25rem',
+              marginTop: '10px',
+            }}
+          />
+        )}
       </MantineAppShell.Navbar>
 
       <MantineAppShell.Main>{children}</MantineAppShell.Main>

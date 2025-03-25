@@ -6,6 +6,7 @@ import { HomePage } from './pages/Home.page';
 import { LoginPage } from './pages/Login.page';
 import { MessageDetailPage } from './pages/MessageDetail.page';
 import { RegisterPage } from './pages/Register.page';
+import { UserProfilePage } from './pages/UserProfile.page';
 
 // Protected route component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -35,7 +36,7 @@ function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export function Router() {
+export function AppRouter() {
   const router = createBrowserRouter([
     {
       path: '/',
@@ -88,6 +89,18 @@ export function Router() {
           <MessageDetailPage />
         </ProtectedRoute>
       ),
+    },
+    {
+      path: '/user/:id',
+      element: (
+        <ProtectedRoute>
+          <UserProfilePage />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '*',
+      element: <Navigate to="/" />,
     },
   ]);
 

@@ -1,19 +1,23 @@
+import { ApolloProvider } from '@apollo/client';
+import { MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
+
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 
-import { MantineProvider } from '@mantine/core';
-import { Notifications } from '@mantine/notifications';
 import { AuthProvider } from './contexts/AuthContext';
-import { Router } from './Router';
-import { theme } from './theme';
+import { client } from './lib/apolloClient';
+import { AppRouter } from './Router';
 
 export default function App() {
   return (
-    <MantineProvider theme={theme}>
-      <Notifications />
-      <AuthProvider>
-        <Router />
-      </AuthProvider>
-    </MantineProvider>
+    <ApolloProvider client={client}>
+      <MantineProvider>
+        <Notifications />
+        <AuthProvider>
+          <AppRouter />
+        </AuthProvider>
+      </MantineProvider>
+    </ApolloProvider>
   );
 }

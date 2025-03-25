@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { Avatar, Box, Divider, Group, Paper, Text } from '@mantine/core';
 import { formatDateTime } from '../../utils/dateUtils';
-import { DeleteButton } from '../DeleteButton';
+import { DeleteButton } from '../DeleteButton/DeleteButton';
 import { RatingButtons } from '../RatingButtons';
 
 interface ContentCardProps {
@@ -40,11 +41,15 @@ export function ContentCard({
   return (
     <Paper withBorder p="md" radius="md" mb="xs">
       <Group gap="sm" mb="xs">
-        <Avatar color={variant === 'primary' ? 'blue' : 'cyan'} radius="xl">
-          {author.displayName[0]}
-        </Avatar>
+        <Link to={`/user/${author.id}`}>
+          <Avatar color={variant === 'primary' ? 'blue' : 'cyan'} radius="xl">
+            {author.displayName[0]}
+          </Avatar>
+        </Link>
         <div>
-          <Text fw={500}>{author.displayName}</Text>
+          <Link to={`/user/${author.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Text fw={500}>{author.displayName}</Text>
+          </Link>
           <Text size="xs" c="dimmed">
             {formatDateTime(createdAt)}
           </Text>

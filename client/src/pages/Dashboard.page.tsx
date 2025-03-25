@@ -101,7 +101,11 @@ export function DashboardPage() {
                       <Title order={4}>{channel.name}</Title>
                       {channel.description && <Text>{channel.description}</Text>}
                       <Text size="sm" c="dimmed">
-                        Created by {channel.creator.displayName} on {formatDate(channel.createdAt)}
+                        Created by{' '}
+                        <Link to={`/user/${channel.creator.id}`}>
+                          {channel.creator.displayName}
+                        </Link>{' '}
+                        on {formatDate(channel.createdAt)}
                       </Text>
                     </div>
                     <Button component={Link} to={`/channel/${channel.id}`} variant="outline">
