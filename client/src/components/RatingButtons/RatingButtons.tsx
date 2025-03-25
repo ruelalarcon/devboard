@@ -1,8 +1,8 @@
+import { useEffect, useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { ActionIcon, Group, Text, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { useState, useEffect } from 'react';
-import { RATE_CONTENT, DELETE_RATING } from '../../graphql/rating';
+import { DELETE_RATING, RATE_CONTENT } from '../../graphql/rating';
 import { useUserRatings } from '../../hooks/useUserRatings';
 import classes from './RatingButtons.module.css';
 
@@ -23,11 +23,11 @@ export function RatingButtons({
 }: RatingButtonsProps) {
   const { getUserRating, refetch } = useUserRatings();
   const userRating = getUserRating(contentId, contentType);
-  
+
   // Local state to track counts for immediate UI updates
   const [localPositiveCount, setLocalPositiveCount] = useState(positiveCount);
   const [localNegativeCount, setLocalNegativeCount] = useState(negativeCount);
-  
+
   // Update local counts when prop values change (e.g. from parent rerender)
   useEffect(() => {
     setLocalPositiveCount(positiveCount);
@@ -48,14 +48,14 @@ export function RatingButtons({
       // Optimistically update UI before server responds
       if (userRating && userRating.isPositive) {
         // Removing upvote
-        setLocalPositiveCount(prev => prev - 1);
+        setLocalPositiveCount((prev) => prev - 1);
       } else if (userRating && !userRating.isPositive) {
         // Switching from downvote to upvote
-        setLocalPositiveCount(prev => prev + 1);
-        setLocalNegativeCount(prev => prev - 1);
+        setLocalPositiveCount((prev) => prev + 1);
+        setLocalNegativeCount((prev) => prev - 1);
       } else {
         // Adding new upvote
-        setLocalPositiveCount(prev => prev + 1);
+        setLocalPositiveCount((prev) => prev + 1);
       }
 
       // If user already upvoted, delete the rating
@@ -88,7 +88,7 @@ export function RatingButtons({
       // Revert optimistic update on error
       setLocalPositiveCount(positiveCount);
       setLocalNegativeCount(negativeCount);
-      
+
       notifications.show({
         title: 'Error',
         message: error instanceof Error ? error.message : 'Failed to rate content',
@@ -106,14 +106,14 @@ export function RatingButtons({
       // Optimistically update UI before server responds
       if (userRating && !userRating.isPositive) {
         // Removing downvote
-        setLocalNegativeCount(prev => prev - 1);
+        setLocalNegativeCount((prev) => prev - 1);
       } else if (userRating && userRating.isPositive) {
         // Switching from upvote to downvote
-        setLocalPositiveCount(prev => prev - 1);
-        setLocalNegativeCount(prev => prev + 1);
+        setLocalPositiveCount((prev) => prev - 1);
+        setLocalNegativeCount((prev) => prev + 1);
       } else {
         // Adding new downvote
-        setLocalNegativeCount(prev => prev + 1);
+        setLocalNegativeCount((prev) => prev + 1);
       }
 
       // If user already downvoted, delete the rating
@@ -146,7 +146,7 @@ export function RatingButtons({
       // Revert optimistic update on error
       setLocalPositiveCount(positiveCount);
       setLocalNegativeCount(negativeCount);
-      
+
       notifications.show({
         title: 'Error',
         message: error instanceof Error ? error.message : 'Failed to rate content',
@@ -184,9 +184,7 @@ export function RatingButtons({
           disabled={isLoading}
           size="sm"
           aria-label="Downvote"
-          className={
-            userRating?.isPositive === false ? classes.activeDownvote : classes.downvote
-          }
+          className={userRating?.isPositive === false ? classes.activeDownvote : classes.downvote}
         >
           <span role="img" aria-label="Thumbs down">
             👎

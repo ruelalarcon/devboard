@@ -21,7 +21,6 @@ import { AppShell } from '../components/AppShell';
 import { RatingButtons } from '../components/RatingButtons';
 import { GET_CHANNEL } from '../graphql/channel';
 import { CREATE_MESSAGE, GET_MESSAGES_BY_CHANNEL } from '../graphql/message';
-import { useUserRatings } from '../hooks/useUserRatings';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 
 interface Message {
@@ -71,8 +70,6 @@ export function ChannelDetailPage() {
     },
   });
 
-  const { getUserRating, refetch: refetchRatings } = useUserRatings();
-
   const handleSubmit = async (values: typeof form.values) => {
     if (!id) {
       return;
@@ -99,10 +96,6 @@ export function ChannelDetailPage() {
         color: 'red',
       });
     }
-  };
-
-  const handleRatingChange = () => {
-    refetchRatings();
   };
 
   const loading = channelLoading || messagesLoading;
@@ -200,8 +193,6 @@ export function ChannelDetailPage() {
                     contentType="message"
                     positiveCount={message.positiveRatings}
                     negativeCount={message.negativeRatings}
-                    userRating={getUserRating(message.id, 'message')}
-                    onRatingChange={handleRatingChange}
                   />
                   <Button component={Link} to={`/message/${message.id}`} variant="subtle" size="xs">
                     View Replies

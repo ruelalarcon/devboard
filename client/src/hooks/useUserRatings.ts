@@ -12,15 +12,15 @@ export interface UserRating {
 
 export function useUserRatings() {
   const { user } = useAuth();
-  
+
   const { data, loading, error, refetch } = useQuery(GET_USER_RATINGS, {
     skip: !user,
     fetchPolicy: 'network-only', // Don't use cache for this query to ensure we always have fresh data
   });
-  
+
   // Get all user ratings from the server
   const userRatings = data?.me?.ratings || [];
-  
+
   // Get rating for specific content
   const getUserRating = useCallback(
     (contentId: string, contentType: 'message' | 'reply') => {
@@ -28,11 +28,12 @@ export function useUserRatings() {
         return null;
       }
 
-      return userRatings.find(
-        (rating: UserRating) => 
-          rating.contentId === contentId && 
-          rating.contentType === contentType
-      ) || null;
+      return (
+        userRatings.find(
+          (rating: UserRating) =>
+            rating.contentId === contentId && rating.contentType === contentType
+        ) || null
+      );
     },
     [userRatings, user]
   );
