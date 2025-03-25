@@ -1,26 +1,148 @@
-import { useNavigate } from 'react-router-dom';
-import { Button, Container, Group, Text, Title } from '@mantine/core';
-import { useAuth } from '../contexts/AuthContext';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  Alert,
+  Button,
+  Card,
+  Container,
+  Group,
+  Loader,
+  Modal,
+  Stack,
+  Text,
+  TextInput,
+  Textarea,
+  Title,
+} from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
+import { useMutation, useQuery } from '@apollo/client';
+import { AppShell } from '../components/AppShell';
+import { CREATE_CHANNEL, GET_CHANNELS } from '../graphql/channel';
+
+interface Channel {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: string;
+  creator: {
+    id: string;
+    displayName: string;
+  };
+}
 
 export function DashboardPage() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const { loading, error, data, refetch } = useQuery(GET_CHANNELS);
+  const [createChannel, { loading: createLoading }] = useMutation(CREATE_CHANNEL);
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
+  const form = useForm({
+    initialValues: {
+      name: '',
+      description: '',
+    },
+    validate: {
+      name: (value) => (value.length < 3 ? 'Channel name must be at least 3 characters' : null),
+    },
+  });
+
+  const handleSubmit = async (values: typeof form.values) => {
+    try {
+      await createChannel({
+        variables: {
+          name: values.name,
+          description: values.description || undefined,
+        },
+      });
+      notifications.show({
+        title: 'Success',
+        message: 'Channel created successfully',
+        color: 'green',
+      });
+      form.reset();
+      setCreateModalOpen(false);
+      refetch();
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: error instanceof Error ? error.message : 'Failed to create channel',
+        color: 'red',
+      });
+    }
   };
 
   return (
-    <Container py={40}>
-      <Group justify="space-between" mb={30}>
-        <Title>Dashboard</Title>
-        <Button onClick={handleLogout} variant="outline" color="red">
-          Logout
-        </Button>
-      </Group>
+    <AppShell>
+      <Container>
+        <Group justify="space-between" mb="xl">
+          <Title>Dashboard</Title>
+          <Button onClick={() => setCreateModalOpen(true)}>Create Channel</Button>
+        </Group>
 
-      <Text>Hello, {user?.displayName}! Welcome to your dashboard.</Text>
-    </Container>
+        {loading && <Loader />}
+        {error && (
+          <Alert color="red" title="Error">
+            {error.message}
+          </Alert>
+        )}
+
+        {data?.channels && (
+          <Stack>
+            {data.channels.length === 0 ? (
+              <Text c="dimmed" ta="center">
+                No channels yet. Create your first channel!
+              </Text>
+            ) : (
+              data.channels.map((channel: Channel) => (
+                <Card key={channel.id} withBorder shadow="sm" p="lg" radius="md">
+                  <Group justify="space-between">
+                    <div>
+                      <Title order={4}>{channel.name}</Title>
+                      {channel.description && <Text>{channel.description}</Text>}
+                      <Text size="sm" c="dimmed">
+                        Created by {channel.creator.displayName} on{' '}
+                        {new Date(channel.createdAt).toLocaleDateString()}
+                      </Text>
+                    </div>
+                    <Button component={Link} to={`/channel/${channel.id}`} variant="outline">
+                      View Channel
+                    </Button>
+                  </Group>
+                </Card>
+              ))
+            )}
+          </Stack>
+        )}
+
+        <Modal
+          opened={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
+          title="Create New Channel"
+        >
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <TextInput
+              label="Channel Name"
+              placeholder="Enter channel name"
+              required
+              {...form.getInputProps('name')}
+            />
+            <Textarea
+              label="Description"
+              placeholder="Enter channel description (optional)"
+              mt="md"
+              {...form.getInputProps('description')}
+            />
+            <Group justify="flex-end" mt="xl">
+              <Button variant="outline" onClick={() => setCreateModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" loading={createLoading}>
+                Create
+              </Button>
+            </Group>
+          </form>
+        </Modal>
+      </Container>
+    </AppShell>
   );
 }

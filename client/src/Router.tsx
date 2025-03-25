@@ -1,8 +1,10 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { ChannelDetailPage } from './pages/ChannelDetail.page';
 import { DashboardPage } from './pages/Dashboard.page';
 import { HomePage } from './pages/Home.page';
 import { LoginPage } from './pages/Login.page';
+import { MessageDetailPage } from './pages/MessageDetail.page';
 import { RegisterPage } from './pages/Register.page';
 
 // Protected route component
@@ -60,6 +62,30 @@ export function Router() {
       element: (
         <ProtectedRoute>
           <DashboardPage />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/channel/:id',
+      element: (
+        <ProtectedRoute>
+          <ChannelDetailPage />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/message/:id',
+      element: (
+        <ProtectedRoute>
+          <MessageDetailPage />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/reply/:id',
+      element: (
+        <ProtectedRoute>
+          <MessageDetailPage />
         </ProtectedRoute>
       ),
     },

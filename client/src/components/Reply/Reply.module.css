@@ -1,0 +1,22 @@
+.replyContainer {
+  margin-bottom: var(--mantine-spacing-sm);
+}
+
+.replyPaper {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.replyPaper:hover {
+  box-shadow: var(--mantine-shadow-sm);
+}
+
+.nestedReply {
+  position: relative;
+}
+
+.replyForm {
+  margin-top: var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-md);
+  border-top: 1px solid var(--mantine-color-gray-2);
+}
