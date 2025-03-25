@@ -10,6 +10,7 @@ export const GET_MESSAGES_BY_CHANNEL = gql`
       author {
         id
         displayName
+        username
         avatar
       }
       positiveRatings
@@ -28,6 +29,7 @@ export const GET_MESSAGE = gql`
       author {
         id
         displayName
+        username
         avatar
       }
       channel {
@@ -50,6 +52,7 @@ export const CREATE_MESSAGE = gql`
       author {
         id
         displayName
+        username
         avatar
       }
       positiveRatings
@@ -68,6 +71,7 @@ export const GET_REPLIES_BY_MESSAGE = gql`
       author {
         id
         displayName
+        username
         avatar
       }
       positiveRatings
@@ -99,6 +103,7 @@ export const CREATE_REPLY = gql`
       author {
         id
         displayName
+        username
         avatar
       }
       positiveRatings
@@ -117,6 +122,7 @@ export const GET_NESTED_REPLIES = gql`
       author {
         id
         displayName
+        username
         avatar
       }
       positiveRatings

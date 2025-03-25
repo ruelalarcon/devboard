@@ -93,6 +93,9 @@ const typeDefs = gql`
     # Search queries
     searchContent(query: String!): [SearchResult!]!
     contentByUser(userId: ID!): [SearchResult!]!
+    searchChannels(searchTerm: String!, sortBy: String): [Channel!]!
+    searchMessages(searchTerm: String!, sortBy: String): [Message!]!
+    searchUsers(searchTerm: String!, sortBy: String): [User!]!
   }
 
   union SearchResult = Message | Reply

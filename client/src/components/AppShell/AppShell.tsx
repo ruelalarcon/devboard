@@ -100,6 +100,16 @@ export function AppShell({ children }: AppShellProps) {
             }}
           />
         )}
+        <NavLink
+          label="Search"
+          component={Link}
+          to="/search"
+          active={location.pathname === '/search'}
+          style={{
+            borderRadius: '.25rem',
+            marginTop: '10px',
+          }}
+        />
       </MantineAppShell.Navbar>
 
       <MantineAppShell.Main>{children}</MantineAppShell.Main>

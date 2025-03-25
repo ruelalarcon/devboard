@@ -58,25 +58,29 @@ Sequelize.prototype.options.dialectOptions = {
 // Configure all models to convert dates to strings
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].prototype) {
-    const originalToJSON = db[modelName].prototype.toJSON || function() {
-      return { ...this.get() };
-    };
+    const originalToJSON =
+      db[modelName].prototype.toJSON ||
+      function () {
+        return { ...this.get() };
+      };
 
-    db[modelName].prototype.toJSON = function() {
+    db[modelName].prototype.toJSON = function () {
       const values = originalToJSON.call(this);
-      
+
       // Convert timestamps to ISO strings
       if (values.createdAt) {
-        values.createdAt = values.createdAt instanceof Date 
-          ? values.createdAt.toISOString()
-          : values.createdAt;
+        values.createdAt =
+          values.createdAt instanceof Date
+            ? values.createdAt.toISOString()
+            : values.createdAt;
       }
       if (values.updatedAt) {
-        values.updatedAt = values.updatedAt instanceof Date 
-          ? values.updatedAt.toISOString()
-          : values.updatedAt;
+        values.updatedAt =
+          values.updatedAt instanceof Date
+            ? values.updatedAt.toISOString()
+            : values.updatedAt;
       }
-      
+
       return values;
     };
   }

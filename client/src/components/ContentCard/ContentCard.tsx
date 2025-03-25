@@ -13,6 +13,7 @@ interface ContentCardProps {
   author: {
     id: string;
     displayName: string;
+    username: string;
     avatar?: string;
   };
   positiveRatings: number;
@@ -41,7 +42,7 @@ export function ContentCard({
   return (
     <Paper withBorder p="md" radius="md" mb="xs">
       <Group gap="sm" mb="xs">
-        <Link to={`/user/${author.id}`}>
+        <Link to={`/user/${author.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
           <Avatar color={variant === 'primary' ? 'blue' : 'cyan'} radius="xl">
             {author.displayName[0]}
           </Avatar>
@@ -49,6 +50,9 @@ export function ContentCard({
         <div>
           <Link to={`/user/${author.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
             <Text fw={500}>{author.displayName}</Text>
+            <Text size="sm" c="dimmed">
+              @{author.username}
+            </Text>
           </Link>
           <Text size="xs" c="dimmed">
             {formatDateTime(createdAt)}

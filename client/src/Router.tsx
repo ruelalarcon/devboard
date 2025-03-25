@@ -6,6 +6,7 @@ import { HomePage } from './pages/Home.page';
 import { LoginPage } from './pages/Login.page';
 import { MessageDetailPage } from './pages/MessageDetail.page';
 import { RegisterPage } from './pages/Register.page';
+import { SearchPage } from './pages/Search.page';
 import { UserProfilePage } from './pages/UserProfile.page';
 
 // Protected route component
@@ -95,6 +96,14 @@ export function AppRouter() {
       element: (
         <ProtectedRoute>
           <UserProfilePage />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/search',
+      element: (
+        <ProtectedRoute>
+          <SearchPage />
         </ProtectedRoute>
       ),
     },

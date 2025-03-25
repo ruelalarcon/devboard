@@ -10,13 +10,13 @@ module.exports = {
     dialectOptions: {
       dateStrings: true,
       typeCast: function (field, next) {
-        if (field.type === 'DATETIME' || field.type === 'TIMESTAMP') {
+        if (field.type === "DATETIME" || field.type === "TIMESTAMP") {
           return field.string();
         }
         return next();
-      }
+      },
     },
-    timezone: '+00:00', // UTC
+    timezone: "+00:00", // UTC
   },
   test: {
     username: process.env.DB_USER,
@@ -27,13 +27,13 @@ module.exports = {
     dialectOptions: {
       dateStrings: true,
       typeCast: function (field, next) {
-        if (field.type === 'DATETIME' || field.type === 'TIMESTAMP') {
+        if (field.type === "DATETIME" || field.type === "TIMESTAMP") {
           return field.string();
         }
         return next();
-      }
+      },
     },
-    timezone: '+00:00', // UTC
+    timezone: "+00:00", // UTC
   },
   production: {
     username: process.env.DB_USER,
@@ -45,12 +45,12 @@ module.exports = {
     dialectOptions: {
       dateStrings: true,
       typeCast: function (field, next) {
-        if (field.type === 'DATETIME' || field.type === 'TIMESTAMP') {
+        if (field.type === "DATETIME" || field.type === "TIMESTAMP") {
           return field.string();
         }
         return next();
-      }
+      },
     },
-    timezone: '+00:00', // UTC
+    timezone: "+00:00", // UTC
   },
 };
