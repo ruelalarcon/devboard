@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const { Op } = require("sequelize");
 
 module.exports = {
   Query: {
@@ -11,7 +11,7 @@ module.exports = {
           },
         },
       });
-      
+
       const replies = await db.Reply.findAll({
         where: {
           content: {
@@ -19,34 +19,34 @@ module.exports = {
           },
         },
       });
-      
+
       // Combine results
       return [...messages, ...replies];
     },
-    
+
     contentByUser: async (_, { userId }, { db }) => {
       // Get all content by a specific user
       const messages = await db.Message.findAll({
         where: { userId },
       });
-      
+
       const replies = await db.Reply.findAll({
         where: { userId },
       });
-      
+
       // Combine results
       return [...messages, ...replies];
     },
   },
-  
+
   SearchResult: {
     __resolveType(obj) {
       if (obj.channelId) {
-        return 'Message';
+        return "Message";
       } else if (obj.messageId) {
-        return 'Reply';
+        return "Reply";
       }
       return null;
     },
   },
-}; 
+};

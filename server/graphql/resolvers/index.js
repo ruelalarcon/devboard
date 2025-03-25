@@ -1,9 +1,9 @@
-const userResolvers = require('./user');
-const channelResolvers = require('./channel');
-const messageResolvers = require('./message');
-const replyResolvers = require('./reply');
-const ratingResolvers = require('./rating');
-const searchResolvers = require('./search');
+const userResolvers = require("./user");
+const channelResolvers = require("./channel");
+const messageResolvers = require("./message");
+const replyResolvers = require("./reply");
+const ratingResolvers = require("./rating");
+const searchResolvers = require("./search");
 
 module.exports = {
   Query: {
@@ -26,4 +26,4 @@ module.exports = {
   Reply: replyResolvers.Reply,
   Rating: ratingResolvers.Rating,
   SearchResult: searchResolvers.SearchResult,
-}; 
+};

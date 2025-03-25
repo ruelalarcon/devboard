@@ -1,4 +1,4 @@
-const { gql } = require('graphql-tag');
+const { gql } = require("graphql-tag");
 
 const typeDefs = gql`
   type User {
@@ -98,7 +98,12 @@ const typeDefs = gql`
 
   type Mutation {
     # User mutations
-    register(username: String!, password: String!, displayName: String!, avatar: String): AuthPayload
+    register(
+      username: String!
+      password: String!
+      displayName: String!
+      avatar: String
+    ): AuthPayload
     login(username: String!, password: String!): AuthPayload
     logout: Boolean!
     updateUser(displayName: String, avatar: String): User
@@ -115,12 +120,21 @@ const typeDefs = gql`
     deleteMessage(id: ID!): Boolean!
 
     # Reply mutations
-    createReply(messageId: ID!, content: String!, screenshot: String, parentReplyId: ID): Reply
+    createReply(
+      messageId: ID!
+      content: String!
+      screenshot: String
+      parentReplyId: ID
+    ): Reply
     updateReply(id: ID!, content: String, screenshot: String): Reply
     deleteReply(id: ID!): Boolean!
 
     # Rating mutations
-    rateContent(contentId: ID!, contentType: String!, isPositive: Boolean!): Rating
+    rateContent(
+      contentId: ID!
+      contentType: String!
+      isPositive: Boolean!
+    ): Rating
     deleteRating(contentId: ID!, contentType: String!): Boolean!
   }
 `;

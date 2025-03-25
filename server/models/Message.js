@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Message = sequelize.define('Message', {
+  const Message = sequelize.define("Message", {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -17,43 +17,43 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Users',
-        key: 'id',
+        model: "Users",
+        key: "id",
       },
     },
     channelId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Channels',
-        key: 'id',
+        model: "Channels",
+        key: "id",
       },
     },
   });
 
   Message.associate = (models) => {
     Message.belongsTo(models.User, {
-      foreignKey: 'userId',
-      as: 'author',
+      foreignKey: "userId",
+      as: "author",
     });
     Message.belongsTo(models.Channel, {
-      foreignKey: 'channelId',
-      as: 'channel',
+      foreignKey: "channelId",
+      as: "channel",
     });
     Message.hasMany(models.Reply, {
-      foreignKey: 'messageId',
-      as: 'replies',
-      onDelete: 'CASCADE',
+      foreignKey: "messageId",
+      as: "replies",
+      onDelete: "CASCADE",
     });
     Message.hasMany(models.Rating, {
-      foreignKey: 'contentId',
-      as: 'ratings',
+      foreignKey: "contentId",
+      as: "ratings",
       scope: {
-        contentType: 'message',
+        contentType: "message",
       },
-      onDelete: 'CASCADE',
+      onDelete: "CASCADE",
     });
   };
 
   return Message;
-}; 
+};

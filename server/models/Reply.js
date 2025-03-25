@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Reply = sequelize.define('Reply', {
+  const Reply = sequelize.define("Reply", {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -17,55 +17,55 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Users',
-        key: 'id',
+        model: "Users",
+        key: "id",
       },
     },
     messageId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Messages',
-        key: 'id',
+        model: "Messages",
+        key: "id",
       },
     },
     parentReplyId: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: 'Replies',
-        key: 'id',
+        model: "Replies",
+        key: "id",
       },
     },
   });
 
   Reply.associate = (models) => {
     Reply.belongsTo(models.User, {
-      foreignKey: 'userId',
-      as: 'author',
+      foreignKey: "userId",
+      as: "author",
     });
     Reply.belongsTo(models.Message, {
-      foreignKey: 'messageId',
-      as: 'message',
+      foreignKey: "messageId",
+      as: "message",
     });
     Reply.belongsTo(models.Reply, {
-      foreignKey: 'parentReplyId',
-      as: 'parentReply',
+      foreignKey: "parentReplyId",
+      as: "parentReply",
     });
     Reply.hasMany(models.Reply, {
-      foreignKey: 'parentReplyId',
-      as: 'replies',
-      onDelete: 'CASCADE',
+      foreignKey: "parentReplyId",
+      as: "replies",
+      onDelete: "CASCADE",
     });
     Reply.hasMany(models.Rating, {
-      foreignKey: 'contentId',
-      as: 'ratings',
+      foreignKey: "contentId",
+      as: "ratings",
       scope: {
-        contentType: 'reply',
+        contentType: "reply",
       },
-      onDelete: 'CASCADE',
+      onDelete: "CASCADE",
     });
   };
 
   return Reply;
-}; 
+};

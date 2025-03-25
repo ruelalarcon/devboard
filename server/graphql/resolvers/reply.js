@@ -1,9 +1,9 @@
-const { GraphQLError } = require('graphql');
+const { GraphQLError } = require("graphql");
 
 // Helper function to create errors with specific codes
 const createError = (message, code) => {
   return new GraphQLError(message, {
-    extensions: { code }
+    extensions: { code },
   });
 };
 
@@ -15,42 +15,49 @@ module.exports = {
     repliesByMessage: async (_, { messageId }, { db }) => {
       return await db.Reply.findAll({
         where: { messageId, parentReplyId: null },
-        order: [['createdAt', 'ASC']],
+        order: [["createdAt", "ASC"]],
       });
     },
     repliesByParentReply: async (_, { parentReplyId }, { db }) => {
       return await db.Reply.findAll({
         where: { parentReplyId },
-        order: [['createdAt', 'ASC']],
+        order: [["createdAt", "ASC"]],
       });
     },
   },
-  
+
   Mutation: {
-    createReply: async (_, { messageId, content, screenshot, parentReplyId }, { db, req }) => {
+    createReply: async (
+      _,
+      { messageId, content, screenshot, parentReplyId },
+      { db, req }
+    ) => {
       // Authentication check
       if (!req.session.userId) {
-        throw createError('You must be logged in', 'UNAUTHENTICATED');
+        throw createError("You must be logged in", "UNAUTHENTICATED");
       }
-      
+
       // Check if message exists
       const message = await db.Message.findByPk(messageId);
       if (!message) {
-        throw createError('Message not found', 'NOT_FOUND');
+        throw createError("Message not found", "NOT_FOUND");
       }
-      
+
       // If parentReplyId is provided, check if it exists
       if (parentReplyId) {
         const parentReply = await db.Reply.findByPk(parentReplyId);
         if (!parentReply) {
-          throw createError('Parent reply not found', 'NOT_FOUND');
+          throw createError("Parent reply not found", "NOT_FOUND");
         }
         // Make sure parent reply belongs to the same message
         if (parentReply.messageId !== parseInt(messageId)) {
-          throw createError('Parent reply does not belong to the specified message', 'BAD_USER_INPUT');
+          throw createError(
+            "Parent reply does not belong to the specified message",
+            "BAD_USER_INPUT"
+          );
         }
       }
-      
+
       // Create reply
       const reply = await db.Reply.create({
         content,
@@ -59,60 +66,60 @@ module.exports = {
         messageId,
         parentReplyId,
       });
-      
+
       return reply;
     },
-    
+
     updateReply: async (_, { id, content, screenshot }, { db, req }) => {
       // Authentication check
       if (!req.session.userId) {
-        throw createError('You must be logged in', 'UNAUTHENTICATED');
+        throw createError("You must be logged in", "UNAUTHENTICATED");
       }
-      
+
       // Get reply
       const reply = await db.Reply.findByPk(id);
       if (!reply) {
-        throw createError('Reply not found', 'NOT_FOUND');
+        throw createError("Reply not found", "NOT_FOUND");
       }
-      
+
       // Authorization check (admin or creator)
       const user = await db.User.findByPk(req.session.userId);
       if (!user.isAdmin && reply.userId !== user.id) {
-        throw createError('Not authorized', 'FORBIDDEN');
+        throw createError("Not authorized", "FORBIDDEN");
       }
-      
+
       // Update fields if provided
       if (content !== undefined) reply.content = content;
       if (screenshot !== undefined) reply.screenshot = screenshot;
-      
+
       await reply.save();
       return reply;
     },
-    
+
     deleteReply: async (_, { id }, { db, req }) => {
       // Authentication check
       if (!req.session.userId) {
-        throw createError('You must be logged in', 'UNAUTHENTICATED');
+        throw createError("You must be logged in", "UNAUTHENTICATED");
       }
-      
+
       // Get reply
       const reply = await db.Reply.findByPk(id);
       if (!reply) {
-        throw createError('Reply not found', 'NOT_FOUND');
+        throw createError("Reply not found", "NOT_FOUND");
       }
-      
+
       // Authorization check (admin or creator)
       const user = await db.User.findByPk(req.session.userId);
       if (!user.isAdmin && reply.userId !== user.id) {
-        throw createError('Not authorized', 'FORBIDDEN');
+        throw createError("Not authorized", "FORBIDDEN");
       }
-      
+
       // Delete reply
       await reply.destroy();
       return true;
     },
   },
-  
+
   Reply: {
     author: async (reply, _, { db }) => {
       return await db.User.findByPk(reply.userId);
@@ -127,14 +134,14 @@ module.exports = {
     replies: async (reply, _, { db }) => {
       return await db.Reply.findAll({
         where: { parentReplyId: reply.id },
-        order: [['createdAt', 'ASC']],
+        order: [["createdAt", "ASC"]],
       });
     },
     ratings: async (reply, _, { db }) => {
       return await db.Rating.findAll({
         where: {
           contentId: reply.id,
-          contentType: 'reply',
+          contentType: "reply",
         },
       });
     },
@@ -142,7 +149,7 @@ module.exports = {
       return await db.Rating.count({
         where: {
           contentId: reply.id,
-          contentType: 'reply',
+          contentType: "reply",
           isPositive: true,
         },
       });
@@ -151,10 +158,10 @@ module.exports = {
       return await db.Rating.count({
         where: {
           contentId: reply.id,
-          contentType: 'reply',
+          contentType: "reply",
           isPositive: false,
         },
       });
     },
   },
-}; 
+};

@@ -1,9 +1,9 @@
-const { GraphQLError } = require('graphql');
+const { GraphQLError } = require("graphql");
 
 // Helper function to create errors with specific codes
 const createError = (message, code) => {
   return new GraphQLError(message, {
-    extensions: { code }
+    extensions: { code },
   });
 };
 
@@ -21,7 +21,7 @@ module.exports = {
     createChannel: async (_, { name, description }, { db, req }) => {
       // Authentication check
       if (!req.session.userId) {
-        throw createError('You must be logged in', 'UNAUTHENTICATED');
+        throw createError("You must be logged in", "UNAUTHENTICATED");
       }
 
       // Create channel
@@ -37,19 +37,19 @@ module.exports = {
     updateChannel: async (_, { id, name, description }, { db, req }) => {
       // Authentication check
       if (!req.session.userId) {
-        throw createError('You must be logged in', 'UNAUTHENTICATED');
+        throw createError("You must be logged in", "UNAUTHENTICATED");
       }
 
       // Get channel
       const channel = await db.Channel.findByPk(id);
       if (!channel) {
-        throw createError('Channel not found', 'NOT_FOUND');
+        throw createError("Channel not found", "NOT_FOUND");
       }
 
       // Authorization check (admin or creator)
       const user = await db.User.findByPk(req.session.userId);
       if (!user.isAdmin && channel.createdBy !== user.id) {
-        throw createError('Not authorized', 'FORBIDDEN');
+        throw createError("Not authorized", "FORBIDDEN");
       }
 
       // Update fields if provided
@@ -63,19 +63,19 @@ module.exports = {
     deleteChannel: async (_, { id }, { db, req }) => {
       // Authentication check
       if (!req.session.userId) {
-        throw createError('You must be logged in', 'UNAUTHENTICATED');
+        throw createError("You must be logged in", "UNAUTHENTICATED");
       }
 
       // Get channel
       const channel = await db.Channel.findByPk(id);
       if (!channel) {
-        throw createError('Channel not found', 'NOT_FOUND');
+        throw createError("Channel not found", "NOT_FOUND");
       }
 
       // Authorization check (admin or creator)
       const user = await db.User.findByPk(req.session.userId);
       if (!user.isAdmin && channel.createdBy !== user.id) {
-        throw createError('Not authorized', 'FORBIDDEN');
+        throw createError("Not authorized", "FORBIDDEN");
       }
 
       // Delete channel
@@ -91,7 +91,7 @@ module.exports = {
     messages: async (channel, _, { db }) => {
       return await db.Message.findAll({
         where: { channelId: channel.id },
-        order: [['createdAt', 'DESC']],
+        order: [["createdAt", "DESC"]],
       });
     },
   },
