@@ -19,6 +19,7 @@ import {
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { AppShell } from '../components/AppShell';
+import { RatingButtons } from '../components/RatingButtons';
 import { Reply } from '../components/Reply';
 import {
   CREATE_REPLY,
@@ -26,7 +27,9 @@ import {
   GET_NESTED_REPLIES,
   GET_REPLIES_BY_MESSAGE,
 } from '../graphql/message';
+import { useUserRatings } from '../hooks/useUserRatings';
 import { client } from '../lib/apolloClient';
+import { formatDateTime } from '../utils/dateUtils';
 
 interface ReplyType {
   id: string;
@@ -47,6 +50,7 @@ export function MessageDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [nestedReplies, setNestedReplies] = useState<Record<string, ReplyType[]>>({});
+  const { getUserRating, refetch: refetchRatings } = useUserRatings();
 
   const {
     loading: messageLoading,
@@ -173,6 +177,10 @@ export function MessageDetailPage() {
     }
   };
 
+  const handleRatingChange = () => {
+    refetchRatings();
+  };
+
   const renderReplies = (replies: ReplyType[], level = 0) => {
     return (
       <Stack gap="xs">
@@ -265,7 +273,7 @@ export function MessageDetailPage() {
             <div>
               <Text fw={500}>{message.author.displayName}</Text>
               <Text size="xs" c="dimmed">
-                {new Date(message.createdAt).toLocaleString()}
+                {formatDateTime(message.createdAt)}
               </Text>
             </div>
           </Group>
@@ -286,20 +294,14 @@ export function MessageDetailPage() {
 
           <Divider my="sm" />
 
-          <Group>
-            <Text size="sm">
-              <span role="img" aria-label="Thumbs up">
-                👍
-              </span>{' '}
-              {message.positiveRatings}
-            </Text>
-            <Text size="sm">
-              <span role="img" aria-label="Thumbs down">
-                👎
-              </span>{' '}
-              {message.negativeRatings}
-            </Text>
-          </Group>
+          <RatingButtons
+            contentId={message.id}
+            contentType="message"
+            positiveCount={message.positiveRatings}
+            negativeCount={message.negativeRatings}
+            userRating={getUserRating(message.id, 'message')}
+            onRatingChange={handleRatingChange}
+          />
         </Paper>
 
         <Group justify="space-between" mb="md">

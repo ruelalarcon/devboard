@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useMutation, useQuery } from '@apollo/client';
 import { Link } from 'react-router-dom';
 import {
   Alert,
@@ -10,15 +11,15 @@ import {
   Modal,
   Stack,
   Text,
-  TextInput,
   Textarea,
+  TextInput,
   Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { useMutation, useQuery } from '@apollo/client';
 import { AppShell } from '../components/AppShell';
 import { CREATE_CHANNEL, GET_CHANNELS } from '../graphql/channel';
+import { formatDate } from '../utils/dateUtils';
 
 interface Channel {
   id: string;
@@ -100,8 +101,7 @@ export function DashboardPage() {
                       <Title order={4}>{channel.name}</Title>
                       {channel.description && <Text>{channel.description}</Text>}
                       <Text size="sm" c="dimmed">
-                        Created by {channel.creator.displayName} on{' '}
-                        {new Date(channel.createdAt).toLocaleDateString()}
+                        Created by {channel.creator.displayName} on {formatDate(channel.createdAt)}
                       </Text>
                     </div>
                     <Button component={Link} to={`/channel/${channel.id}`} variant="outline">

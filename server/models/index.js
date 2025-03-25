@@ -41,6 +41,47 @@ Object.keys(db).forEach((modelName) => {
   }
 });
 
+// Configure Sequelize to handle date serialization
+if (!Sequelize.prototype.options) {
+  Sequelize.prototype.options = {};
+}
+
+if (!Sequelize.prototype.options.dialectOptions) {
+  Sequelize.prototype.options.dialectOptions = {};
+}
+
+Sequelize.prototype.options.dialectOptions = {
+  ...Sequelize.prototype.options.dialectOptions,
+  useUTC: true,
+};
+
+// Configure all models to convert dates to strings
+Object.keys(db).forEach((modelName) => {
+  if (db[modelName].prototype) {
+    const originalToJSON = db[modelName].prototype.toJSON || function() {
+      return { ...this.get() };
+    };
+
+    db[modelName].prototype.toJSON = function() {
+      const values = originalToJSON.call(this);
+      
+      // Convert timestamps to ISO strings
+      if (values.createdAt) {
+        values.createdAt = values.createdAt instanceof Date 
+          ? values.createdAt.toISOString()
+          : values.createdAt;
+      }
+      if (values.updatedAt) {
+        values.updatedAt = values.updatedAt instanceof Date 
+          ? values.updatedAt.toISOString()
+          : values.updatedAt;
+      }
+      
+      return values;
+    };
+  }
+});
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

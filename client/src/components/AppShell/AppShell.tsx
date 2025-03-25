@@ -59,6 +59,9 @@ export function AppShell({ children }: AppShellProps) {
           component={Link}
           to="/dashboard"
           active={location.pathname === '/dashboard' || location.pathname.startsWith('/channel/')}
+          style={{
+            borderRadius: '.25rem',
+          }}
         />
       </MantineAppShell.Navbar>
 

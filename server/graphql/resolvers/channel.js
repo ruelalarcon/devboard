@@ -13,7 +13,9 @@ module.exports = {
       return await db.Channel.findByPk(id);
     },
     channels: async (_, __, { db }) => {
-      return await db.Channel.findAll();
+      return await db.Channel.findAll({
+        order: [["createdAt", "DESC"]]
+      });
     },
   },
 

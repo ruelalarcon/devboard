@@ -18,8 +18,11 @@ import {
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { AppShell } from '../components/AppShell';
+import { RatingButtons } from '../components/RatingButtons';
 import { GET_CHANNEL } from '../graphql/channel';
 import { CREATE_MESSAGE, GET_MESSAGES_BY_CHANNEL } from '../graphql/message';
+import { useUserRatings } from '../hooks/useUserRatings';
+import { formatDate, formatDateTime } from '../utils/dateUtils';
 
 interface Message {
   id: string;
@@ -68,6 +71,8 @@ export function ChannelDetailPage() {
     },
   });
 
+  const { getUserRating, refetch: refetchRatings } = useUserRatings();
+
   const handleSubmit = async (values: typeof form.values) => {
     if (!id) {
       return;
@@ -94,6 +99,10 @@ export function ChannelDetailPage() {
         color: 'red',
       });
     }
+  };
+
+  const handleRatingChange = () => {
+    refetchRatings();
   };
 
   const loading = channelLoading || messagesLoading;
@@ -125,8 +134,7 @@ export function ChannelDetailPage() {
           <Title order={2}>{channel.name}</Title>
           {channel.description && <Text mt="xs">{channel.description}</Text>}
           <Text size="sm" c="dimmed" mt="xs">
-            Created by {channel.creator.displayName} on{' '}
-            {new Date(channel.createdAt).toLocaleDateString()}
+            Created by {channel.creator.displayName} on {formatDate(channel.createdAt)}
           </Text>
         </Paper>
 
@@ -167,7 +175,7 @@ export function ChannelDetailPage() {
                   <div>
                     <Text fw={500}>{message.author.displayName}</Text>
                     <Text size="xs" c="dimmed">
-                      {new Date(message.createdAt).toLocaleString()}
+                      {formatDateTime(message.createdAt)}
                     </Text>
                   </div>
                 </Group>
@@ -187,20 +195,14 @@ export function ChannelDetailPage() {
                 <Divider my="sm" />
 
                 <Group justify="space-between">
-                  <Group gap="xs">
-                    <Text size="sm">
-                      <span role="img" aria-label="Thumbs up">
-                        👍
-                      </span>{' '}
-                      {message.positiveRatings}
-                    </Text>
-                    <Text size="sm">
-                      <span role="img" aria-label="Thumbs down">
-                        👎
-                      </span>{' '}
-                      {message.negativeRatings}
-                    </Text>
-                  </Group>
+                  <RatingButtons
+                    contentId={message.id}
+                    contentType="message"
+                    positiveCount={message.positiveRatings}
+                    negativeCount={message.negativeRatings}
+                    userRating={getUserRating(message.id, 'message')}
+                    onRatingChange={handleRatingChange}
+                  />
                   <Button component={Link} to={`/message/${message.id}`} variant="subtle" size="xs">
                     View Replies
                   </Button>

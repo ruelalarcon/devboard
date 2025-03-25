@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Avatar, Box, Button, Divider, Group, Paper, Text, Textarea } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useUserRatings } from '../../hooks/useUserRatings';
+import { formatDateTime } from '../../utils/dateUtils';
+import { RatingButtons } from '../RatingButtons';
 import classes from './Reply.module.css';
 
 interface ReplyProps {
@@ -35,6 +38,7 @@ export function Reply({
   children,
 }: ReplyProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
+  const { getUserRating, refetch: refetchRatings } = useUserRatings();
 
   const form = useForm({
     initialValues: {
@@ -61,6 +65,10 @@ export function Reply({
     }
   };
 
+  const handleRatingChange = () => {
+    refetchRatings();
+  };
+
   return (
     <Box className={classes.replyContainer}>
       <Paper
@@ -78,7 +86,7 @@ export function Reply({
           <div>
             <Text fw={500}>{author.displayName}</Text>
             <Text size="xs" c="dimmed">
-              {new Date(createdAt).toLocaleString()}
+              {formatDateTime(createdAt)}
             </Text>
           </div>
         </Group>
@@ -98,20 +106,14 @@ export function Reply({
         <Divider my="sm" />
 
         <Group justify="space-between">
-          <Group gap="xs">
-            <Text size="sm">
-              <span role="img" aria-label="Thumbs up">
-                👍
-              </span>{' '}
-              {positiveRatings}
-            </Text>
-            <Text size="sm">
-              <span role="img" aria-label="Thumbs down">
-                👎
-              </span>{' '}
-              {negativeRatings}
-            </Text>
-          </Group>
+          <RatingButtons
+            contentId={id}
+            contentType="reply"
+            positiveCount={positiveRatings}
+            negativeCount={negativeRatings}
+            userRating={getUserRating(id, 'reply')}
+            onRatingChange={handleRatingChange}
+          />
 
           <Button variant="subtle" size="xs" onClick={handleReplyClick}>
             Reply

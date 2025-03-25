@@ -1,0 +1,28 @@
+.ratingContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+}
+
+.upvote:hover {
+  color: var(--mantine-color-blue-0);
+}
+
+.downvote:hover {
+  color: var(--mantine-color-red-0);
+}
+
+.activeUpvote {
+  color: var(--mantine-color-blue-6);
+  background-color: var(--mantine-color-blue-6);
+}
+
+.activeDownvote {
+  color: var(--mantine-color-red-6);
+  background-color: var(--mantine-color-red-6);
+}
+
+.ratingCount {
+  min-width: 20px;
+  text-align: center;
+}

@@ -59,11 +59,11 @@ module.exports = (sequelize, DataTypes) => {
     });
     Reply.hasMany(models.Rating, {
       foreignKey: "contentId",
-      as: "ratings",
+      constraints: false,
       scope: {
         contentType: "reply",
       },
-      onDelete: "CASCADE",
+      as: "ratings",
     });
   };
 

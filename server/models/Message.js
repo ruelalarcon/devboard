@@ -47,11 +47,11 @@ module.exports = (sequelize, DataTypes) => {
     });
     Message.hasMany(models.Rating, {
       foreignKey: "contentId",
-      as: "ratings",
+      constraints: false,
       scope: {
         contentType: "message",
       },
-      onDelete: "CASCADE",
+      as: "ratings",
     });
   };
 
