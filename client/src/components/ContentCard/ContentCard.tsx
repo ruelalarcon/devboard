@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Avatar, Box, Divider, Group, Paper, Text } from '@mantine/core';
 import { formatDateTime } from '../../utils/dateUtils';
-import { DeleteButton } from '../DeleteButton/DeleteButton';
+import { DeleteButton } from '../DeleteButton';
 import { RatingButtons } from '../RatingButtons';
 
 interface ContentCardProps {
