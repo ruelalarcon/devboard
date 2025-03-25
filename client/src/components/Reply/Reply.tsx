@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Avatar, Box, Button, Divider, Group, Paper, Text, Textarea } from '@mantine/core';
-import { useForm } from '@mantine/form';
+import { Avatar, Box, Button, Divider, Group, Paper, Text } from '@mantine/core';
 import { useUserRatings } from '../../hooks/useUserRatings';
 import { formatDateTime } from '../../utils/dateUtils';
 import { RatingButtons } from '../RatingButtons';
+import { ReplyForm } from '../ReplyForm';
 import classes from './Reply.module.css';
 
 interface ReplyProps {
@@ -40,15 +40,6 @@ export function Reply({
   const [showReplyForm, setShowReplyForm] = useState(false);
   const { refetch: refetchRatings } = useUserRatings();
 
-  const form = useForm({
-    initialValues: {
-      content: '',
-    },
-    validate: {
-      content: (value) => (value.length < 1 ? 'Reply cannot be empty' : null),
-    },
-  });
-
   const handleReplyClick = () => {
     if (onSubmitNestedReply) {
       setShowReplyForm(true);
@@ -57,16 +48,11 @@ export function Reply({
     }
   };
 
-  const handleSubmit = async (values: { content: string }) => {
+  const handleSubmitReply = async (content: string) => {
     if (onSubmitNestedReply) {
-      await onSubmitNestedReply(values.content, id);
-      form.reset();
+      await onSubmitNestedReply(content, id);
       setShowReplyForm(false);
     }
-  };
-
-  const handleRatingChange = () => {
-    refetchRatings();
   };
 
   return (
@@ -111,7 +97,7 @@ export function Reply({
             contentType="reply"
             positiveCount={positiveRatings}
             negativeCount={negativeRatings}
-            onRatingChange={handleRatingChange}
+            onRatingChange={refetchRatings}
           />
 
           <Button variant="subtle" size="xs" onClick={handleReplyClick}>
@@ -121,22 +107,7 @@ export function Reply({
 
         {showReplyForm && (
           <Box className={classes.replyForm}>
-            <form onSubmit={form.onSubmit(handleSubmit)}>
-              <Textarea
-                placeholder="Write your reply..."
-                minRows={2}
-                mb="sm"
-                {...form.getInputProps('content')}
-              />
-              <Group justify="flex-end">
-                <Button variant="subtle" size="xs" onClick={() => setShowReplyForm(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" size="xs">
-                  Post Reply
-                </Button>
-              </Group>
-            </form>
+            <ReplyForm onSubmit={handleSubmitReply} onCancel={() => setShowReplyForm(false)} />
           </Box>
         )}
       </Paper>

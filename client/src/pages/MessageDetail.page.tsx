@@ -13,14 +13,13 @@ import {
   Paper,
   Stack,
   Text,
-  Textarea,
   Title,
 } from '@mantine/core';
-import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { AppShell } from '../components/AppShell';
 import { RatingButtons } from '../components/RatingButtons';
 import { Reply } from '../components/Reply';
+import { ReplyForm } from '../components/ReplyForm';
 import {
   CREATE_REPLY,
   GET_MESSAGE,
@@ -46,11 +45,72 @@ interface ReplyType {
   replies: { id: string }[];
 }
 
+interface MessageContent {
+  id: string;
+  content: string;
+  screenshot?: string;
+  createdAt: string;
+  positiveRatings: number;
+  negativeRatings: number;
+  author: {
+    id: string;
+    displayName: string;
+    avatar?: string;
+  };
+  channel: {
+    id: string;
+    name: string;
+  };
+}
+
+function MessageHeader({ message }: { message: MessageContent }) {
+  const { refetch: refetchRatings } = useUserRatings();
+
+  return (
+    <Paper withBorder p="md" mb="xl" radius="md">
+      <Group gap="sm" mb="xs">
+        <Avatar color="blue" radius="xl">
+          {message.author.displayName[0]}
+        </Avatar>
+        <div>
+          <Text fw={500}>{message.author.displayName}</Text>
+          <Text size="xs" c="dimmed">
+            {formatDateTime(message.createdAt)}
+          </Text>
+        </div>
+      </Group>
+
+      <Text size="lg" my="md">
+        {message.content}
+      </Text>
+
+      {message.screenshot && (
+        <Box my="md">
+          <img
+            src={message.screenshot}
+            alt="Screenshot"
+            style={{ maxWidth: '100%', maxHeight: '300px' }}
+          />
+        </Box>
+      )}
+
+      <Divider my="sm" />
+
+      <RatingButtons
+        contentId={message.id}
+        contentType="message"
+        positiveCount={message.positiveRatings}
+        negativeCount={message.negativeRatings}
+        onRatingChange={refetchRatings}
+      />
+    </Paper>
+  );
+}
+
 export function MessageDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [nestedReplies, setNestedReplies] = useState<Record<string, ReplyType[]>>({});
-  const { refetch: refetchRatings } = useUserRatings();
 
   const {
     loading: messageLoading,
@@ -95,16 +155,7 @@ export function MessageDetailPage() {
     }
   };
 
-  const form = useForm({
-    initialValues: {
-      content: '',
-    },
-    validate: {
-      content: (value) => (value.length < 1 ? 'Reply cannot be empty' : null),
-    },
-  });
-
-  const handleSubmit = async (values: typeof form.values) => {
+  const handleSubmitReply = async (content: string) => {
     if (!id) {
       return;
     }
@@ -113,7 +164,7 @@ export function MessageDetailPage() {
       await createReply({
         variables: {
           messageId: id,
-          content: values.content,
+          content,
           parentReplyId: replyingTo || undefined,
         },
       });
@@ -124,12 +175,10 @@ export function MessageDetailPage() {
         color: 'green',
       });
 
-      form.reset();
-      setReplyingTo(null);
-
       if (replyingTo) {
         // Refetch nested replies if replying to a reply
         fetchNestedReplies(replyingTo);
+        setReplyingTo(null);
       } else {
         refetchReplies();
       }
@@ -177,10 +226,6 @@ export function MessageDetailPage() {
     }
   };
 
-  const handleRatingChange = () => {
-    refetchRatings();
-  };
-
   const renderReplies = (replies: ReplyType[], level = 0) => {
     return (
       <Stack gap="xs">
@@ -220,6 +265,7 @@ export function MessageDetailPage() {
     );
   };
 
+  // Handle loading and error states
   const loading = messageLoading || repliesLoading;
   const error = messageError || repliesError;
 
@@ -265,43 +311,7 @@ export function MessageDetailPage() {
           </Button>
         </Group>
 
-        <Paper withBorder p="md" mb="xl" radius="md">
-          <Group gap="sm" mb="xs">
-            <Avatar color="blue" radius="xl">
-              {message.author.displayName[0]}
-            </Avatar>
-            <div>
-              <Text fw={500}>{message.author.displayName}</Text>
-              <Text size="xs" c="dimmed">
-                {formatDateTime(message.createdAt)}
-              </Text>
-            </div>
-          </Group>
-
-          <Text size="lg" my="md">
-            {message.content}
-          </Text>
-
-          {message.screenshot && (
-            <Box my="md">
-              <img
-                src={message.screenshot}
-                alt="Screenshot"
-                style={{ maxWidth: '100%', maxHeight: '300px' }}
-              />
-            </Box>
-          )}
-
-          <Divider my="sm" />
-
-          <RatingButtons
-            contentId={message.id}
-            contentType="message"
-            positiveCount={message.positiveRatings}
-            negativeCount={message.negativeRatings}
-            onRatingChange={handleRatingChange}
-          />
-        </Paper>
+        <MessageHeader message={message} />
 
         <Group justify="space-between" mb="md">
           <Title order={3}>
@@ -316,21 +326,12 @@ export function MessageDetailPage() {
         </Group>
 
         <Paper withBorder p="md" mb="xl">
-          <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Textarea
-              placeholder={
-                replyingTo ? 'Type your reply to this comment...' : 'Type your reply here...'
-              }
-              minRows={3}
-              mb="md"
-              {...form.getInputProps('content')}
-            />
-            <Group justify="flex-end">
-              <Button type="submit" loading={createLoading}>
-                Post Reply
-              </Button>
-            </Group>
-          </form>
+          <ReplyForm
+            onSubmit={handleSubmitReply}
+            onCancel={() => {}}
+            initialContent=""
+            isLoading={createLoading}
+          />
         </Paper>
 
         {repliesLoading ? (
