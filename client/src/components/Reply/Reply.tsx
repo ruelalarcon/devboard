@@ -38,7 +38,7 @@ export function Reply({
   children,
 }: ReplyProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
-  const { getUserRating, refetch: refetchRatings } = useUserRatings();
+  const { refetch: refetchRatings } = useUserRatings();
 
   const form = useForm({
     initialValues: {
@@ -111,7 +111,6 @@ export function Reply({
             contentType="reply"
             positiveCount={positiveRatings}
             negativeCount={negativeRatings}
-            userRating={getUserRating(id, 'reply')}
             onRatingChange={handleRatingChange}
           />
 

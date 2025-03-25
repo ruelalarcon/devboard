@@ -10,6 +10,7 @@ const typeDefs = gql`
     channels: [Channel!]
     messages: [Message!]
     replies: [Reply!]
+    ratings: [Rating!]
     createdAt: String!
     updatedAt: String!
   }

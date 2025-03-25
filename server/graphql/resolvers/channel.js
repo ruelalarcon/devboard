@@ -14,7 +14,7 @@ module.exports = {
     },
     channels: async (_, __, { db }) => {
       return await db.Channel.findAll({
-        order: [["createdAt", "DESC"]]
+        order: [["createdAt", "DESC"]],
       });
     },
   },

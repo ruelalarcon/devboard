@@ -227,5 +227,10 @@ module.exports = {
         where: { userId: user.id },
       });
     },
+    ratings: async (user, _, { db }) => {
+      return await db.Rating.findAll({
+        where: { userId: user.id },
+      });
+    },
   },
 };

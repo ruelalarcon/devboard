@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { ActionIcon, Group, Text, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { DELETE_RATING, RATE_CONTENT } from '../../graphql/rating';
+import { useState, useEffect } from 'react';
+import { RATE_CONTENT, DELETE_RATING } from '../../graphql/rating';
 import { useUserRatings } from '../../hooks/useUserRatings';
 import classes from './RatingButtons.module.css';
 
@@ -11,10 +11,6 @@ interface RatingButtonsProps {
   contentType: 'message' | 'reply';
   positiveCount: number;
   negativeCount: number;
-  userRating?: {
-    id: string;
-    isPositive: boolean;
-  } | null;
   onRatingChange?: () => void;
 }
 
@@ -23,14 +19,20 @@ export function RatingButtons({
   contentType,
   positiveCount,
   negativeCount,
-  userRating,
   onRatingChange,
 }: RatingButtonsProps) {
+  const { getUserRating, refetch } = useUserRatings();
+  const userRating = getUserRating(contentId, contentType);
+  
+  // Local state to track counts for immediate UI updates
   const [localPositiveCount, setLocalPositiveCount] = useState(positiveCount);
   const [localNegativeCount, setLocalNegativeCount] = useState(negativeCount);
-  const [localUserRating, setLocalUserRating] = useState(userRating);
-
-  const { updateLocalRating } = useUserRatings();
+  
+  // Update local counts when prop values change (e.g. from parent rerender)
+  useEffect(() => {
+    setLocalPositiveCount(positiveCount);
+    setLocalNegativeCount(negativeCount);
+  }, [positiveCount, negativeCount]);
 
   const [rateContent, { loading: ratingLoading }] = useMutation(RATE_CONTENT);
   const [deleteRating, { loading: deleteLoading }] = useMutation(DELETE_RATING);
@@ -43,77 +45,50 @@ export function RatingButtons({
     }
 
     try {
+      // Optimistically update UI before server responds
+      if (userRating && userRating.isPositive) {
+        // Removing upvote
+        setLocalPositiveCount(prev => prev - 1);
+      } else if (userRating && !userRating.isPositive) {
+        // Switching from downvote to upvote
+        setLocalPositiveCount(prev => prev + 1);
+        setLocalNegativeCount(prev => prev - 1);
+      } else {
+        // Adding new upvote
+        setLocalPositiveCount(prev => prev + 1);
+      }
+
       // If user already upvoted, delete the rating
-      if (localUserRating && localUserRating.isPositive) {
+      if (userRating && userRating.isPositive) {
         await deleteRating({
           variables: {
             contentId,
             contentType,
           },
         });
-        setLocalUserRating(null);
-        setLocalPositiveCount((prev) => prev - 1);
-
-        // Update local cache
-        updateLocalRating(
-          {
-            id: localUserRating.id,
-            contentId,
-            contentType,
-            isPositive: true,
-          },
-          true
-        );
       }
-      // If user already downvoted, change to upvote
-      else if (localUserRating && !localUserRating.isPositive) {
-        const { data } = await rateContent({
-          variables: {
-            contentId,
-            contentType,
-            isPositive: true,
-          },
-        });
-        setLocalUserRating({ id: data.rateContent.id, isPositive: true });
-        setLocalPositiveCount((prev) => prev + 1);
-        setLocalNegativeCount((prev) => prev - 1);
-
-        // Update local cache
-        updateLocalRating({
-          id: data.rateContent.id,
-          contentId,
-          contentType,
-          isPositive: true,
-        });
-      }
-      // If user hasn't rated yet, create an upvote
+      // If user already downvoted or hasn't voted, create/update to upvote
       else {
-        const { data } = await rateContent({
+        await rateContent({
           variables: {
             contentId,
             contentType,
             isPositive: true,
           },
         });
-        setLocalUserRating({
-          id: data.rateContent.id,
-          isPositive: data.rateContent.isPositive,
-        });
-        setLocalPositiveCount((prev) => prev + 1);
-
-        // Update local cache
-        updateLocalRating({
-          id: data.rateContent.id,
-          contentId,
-          contentType,
-          isPositive: true,
-        });
       }
+
+      // Refresh ratings from server
+      await refetch();
 
       if (onRatingChange) {
         onRatingChange();
       }
     } catch (error) {
+      // Revert optimistic update on error
+      setLocalPositiveCount(positiveCount);
+      setLocalNegativeCount(negativeCount);
+      
       notifications.show({
         title: 'Error',
         message: error instanceof Error ? error.message : 'Failed to rate content',
@@ -128,77 +103,50 @@ export function RatingButtons({
     }
 
     try {
+      // Optimistically update UI before server responds
+      if (userRating && !userRating.isPositive) {
+        // Removing downvote
+        setLocalNegativeCount(prev => prev - 1);
+      } else if (userRating && userRating.isPositive) {
+        // Switching from upvote to downvote
+        setLocalPositiveCount(prev => prev - 1);
+        setLocalNegativeCount(prev => prev + 1);
+      } else {
+        // Adding new downvote
+        setLocalNegativeCount(prev => prev + 1);
+      }
+
       // If user already downvoted, delete the rating
-      if (localUserRating && !localUserRating.isPositive) {
+      if (userRating && !userRating.isPositive) {
         await deleteRating({
           variables: {
             contentId,
             contentType,
           },
         });
-        setLocalUserRating(null);
-        setLocalNegativeCount((prev) => prev - 1);
-
-        // Update local cache
-        updateLocalRating(
-          {
-            id: localUserRating.id,
-            contentId,
-            contentType,
-            isPositive: false,
-          },
-          true
-        );
       }
-      // If user already upvoted, change to downvote
-      else if (localUserRating && localUserRating.isPositive) {
-        const { data } = await rateContent({
-          variables: {
-            contentId,
-            contentType,
-            isPositive: false,
-          },
-        });
-        setLocalUserRating({ id: data.rateContent.id, isPositive: false });
-        setLocalPositiveCount((prev) => prev - 1);
-        setLocalNegativeCount((prev) => prev + 1);
-
-        // Update local cache
-        updateLocalRating({
-          id: data.rateContent.id,
-          contentId,
-          contentType,
-          isPositive: false,
-        });
-      }
-      // If user hasn't rated yet, create a downvote
+      // If user already upvoted or hasn't voted, create/update to downvote
       else {
-        const { data } = await rateContent({
+        await rateContent({
           variables: {
             contentId,
             contentType,
             isPositive: false,
           },
         });
-        setLocalUserRating({
-          id: data.rateContent.id,
-          isPositive: data.rateContent.isPositive,
-        });
-        setLocalNegativeCount((prev) => prev + 1);
-
-        // Update local cache
-        updateLocalRating({
-          id: data.rateContent.id,
-          contentId,
-          contentType,
-          isPositive: false,
-        });
       }
+
+      // Refresh ratings from server
+      await refetch();
 
       if (onRatingChange) {
         onRatingChange();
       }
     } catch (error) {
+      // Revert optimistic update on error
+      setLocalPositiveCount(positiveCount);
+      setLocalNegativeCount(negativeCount);
+      
       notifications.show({
         title: 'Error',
         message: error instanceof Error ? error.message : 'Failed to rate content',
@@ -207,20 +155,17 @@ export function RatingButtons({
     }
   };
 
-  // Use localUserRating if available, otherwise use prop
-  const effectiveUserRating = localUserRating ?? userRating;
-
   return (
     <Group gap="xs" className={classes.ratingContainer}>
-      <Tooltip label={effectiveUserRating?.isPositive ? 'Remove upvote' : 'Upvote'}>
+      <Tooltip label={userRating?.isPositive ? 'Remove upvote' : 'Upvote'}>
         <ActionIcon
-          variant={effectiveUserRating?.isPositive ? 'filled' : 'subtle'}
-          color={effectiveUserRating?.isPositive ? 'blue' : 'gray'}
+          variant={userRating?.isPositive ? 'filled' : 'subtle'}
+          color={userRating?.isPositive ? 'blue' : 'gray'}
           onClick={handleUpvote}
           disabled={isLoading}
           size="sm"
           aria-label="Upvote"
-          className={effectiveUserRating?.isPositive ? classes.activeUpvote : classes.upvote}
+          className={userRating?.isPositive ? classes.activeUpvote : classes.upvote}
         >
           <span role="img" aria-label="Thumbs up">
             👍
@@ -231,16 +176,16 @@ export function RatingButtons({
         {localPositiveCount}
       </Text>
 
-      <Tooltip label={effectiveUserRating?.isPositive === false ? 'Remove downvote' : 'Downvote'}>
+      <Tooltip label={userRating?.isPositive === false ? 'Remove downvote' : 'Downvote'}>
         <ActionIcon
-          variant={effectiveUserRating?.isPositive === false ? 'filled' : 'subtle'}
-          color={effectiveUserRating?.isPositive === false ? 'red' : 'gray'}
+          variant={userRating?.isPositive === false ? 'filled' : 'subtle'}
+          color={userRating?.isPositive === false ? 'red' : 'gray'}
           onClick={handleDownvote}
           disabled={isLoading}
           size="sm"
           aria-label="Downvote"
           className={
-            effectiveUserRating?.isPositive === false ? classes.activeDownvote : classes.downvote
+            userRating?.isPositive === false ? classes.activeDownvote : classes.downvote
           }
         >
           <span role="img" aria-label="Thumbs down">

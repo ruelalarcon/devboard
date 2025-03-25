@@ -50,7 +50,7 @@ export function MessageDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [nestedReplies, setNestedReplies] = useState<Record<string, ReplyType[]>>({});
-  const { getUserRating, refetch: refetchRatings } = useUserRatings();
+  const { refetch: refetchRatings } = useUserRatings();
 
   const {
     loading: messageLoading,
@@ -299,7 +299,6 @@ export function MessageDetailPage() {
             contentType="message"
             positiveCount={message.positiveRatings}
             negativeCount={message.negativeRatings}
-            userRating={getUserRating(message.id, 'message')}
             onRatingChange={handleRatingChange}
           />
         </Paper>
