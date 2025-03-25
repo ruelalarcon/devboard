@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { notifications } from '@mantine/notifications';
-import { CREATE_MESSAGE, CREATE_REPLY } from '../graphql/message';
+import { CREATE_MESSAGE, CREATE_REPLY, DELETE_MESSAGE, DELETE_REPLY } from '../graphql/message';
 
 type ContentType = 'message' | 'channel' | 'reply';
 
@@ -15,6 +15,8 @@ export function useContent({ contentId, contentType: _contentType, onSuccess }: 
   const [uploadLoading, setUploadLoading] = useState(false);
   const [createReply, { loading: replyLoading }] = useMutation(CREATE_REPLY);
   const [createMessage, { loading: messageLoading }] = useMutation(CREATE_MESSAGE);
+  const [deleteMessage, { loading: deleteMessageLoading }] = useMutation(DELETE_MESSAGE);
+  const [deleteReply, { loading: deleteReplyLoading }] = useMutation(DELETE_REPLY);
 
   const uploadFile = async (file: File): Promise<string | null> => {
     if (!file) {
@@ -163,9 +165,72 @@ export function useContent({ contentId, contentType: _contentType, onSuccess }: 
     }
   };
 
+  const removeMessage = async (messageId: string) => {
+    try {
+      await deleteMessage({
+        variables: {
+          id: messageId,
+        },
+      });
+
+      notifications.show({
+        title: 'Success',
+        message: 'Message deleted successfully',
+        color: 'green',
+      });
+
+      if (onSuccess) {
+        onSuccess();
+      }
+
+      return true;
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: error instanceof Error ? error.message : 'Failed to delete message',
+        color: 'red',
+      });
+
+      return false;
+    }
+  };
+
+  const removeReply = async (replyId: string) => {
+    try {
+      await deleteReply({
+        variables: {
+          id: replyId,
+        },
+      });
+
+      notifications.show({
+        title: 'Success',
+        message: 'Reply deleted successfully',
+        color: 'green',
+      });
+
+      if (onSuccess) {
+        onSuccess();
+      }
+
+      return true;
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: error instanceof Error ? error.message : 'Failed to delete reply',
+        color: 'red',
+      });
+
+      return false;
+    }
+  };
+
   return {
     addReply,
     addMessage,
-    isLoading: replyLoading || messageLoading || uploadLoading,
+    removeMessage,
+    removeReply,
+    isLoading:
+      replyLoading || messageLoading || uploadLoading || deleteMessageLoading || deleteReplyLoading,
   };
 }

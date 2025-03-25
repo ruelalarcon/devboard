@@ -136,3 +136,15 @@ export const RATE_CONTENT = gql`
     }
   }
 `;
+
+export const DELETE_MESSAGE = gql`
+  mutation DeleteMessage($id: ID!) {
+    deleteMessage(id: $id)
+  }
+`;
+
+export const DELETE_REPLY = gql`
+  mutation DeleteReply($id: ID!) {
+    deleteReply(id: $id)
+  }
+`;

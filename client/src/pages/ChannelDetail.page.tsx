@@ -57,7 +57,11 @@ export function ChannelDetailPage() {
   });
 
   const [_createMessage, { loading: createLoading }] = useMutation(CREATE_MESSAGE);
-  const { addMessage, isLoading: contentLoading } = useContent({
+  const {
+    addMessage,
+    removeMessage,
+    isLoading: contentLoading,
+  } = useContent({
     contentType: 'channel',
     onSuccess: () => refetchMessages(),
   });
@@ -68,6 +72,10 @@ export function ChannelDetailPage() {
     }
 
     await addMessage(id, content, file);
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    await removeMessage(messageId);
   };
 
   const loading = channelLoading || messagesLoading;
@@ -156,6 +164,7 @@ export function ChannelDetailPage() {
                   negativeRatings={message.negativeRatings}
                   contentType="message"
                   onRatingChange={() => {}}
+                  onDelete={() => handleDeleteMessage(message.id)}
                 >
                   <Button component={Link} to={`/message/${message.id}`} variant="subtle" size="xs">
                     View Replies

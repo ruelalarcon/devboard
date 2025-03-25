@@ -24,6 +24,7 @@ interface ReplyProps {
     parentReplyId: string,
     file: File | null
   ) => Promise<void>;
+  onDelete?: () => Promise<void>;
   children?: React.ReactNode;
 }
 
@@ -38,6 +39,7 @@ export function Reply({
   level = 0,
   onReply,
   onSubmitNestedReply,
+  onDelete,
   children,
 }: ReplyProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
@@ -71,6 +73,7 @@ export function Reply({
           negativeRatings={negativeRatings}
           contentType="reply"
           onRatingChange={refetchRatings}
+          onDelete={onDelete}
           variant="secondary"
         >
           <Button variant="subtle" size="xs" onClick={handleReplyClick}>

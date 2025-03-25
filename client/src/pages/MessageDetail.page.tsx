@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@apollo/client';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -40,6 +40,7 @@ interface ReplyType {
 
 export function MessageDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [nestedReplies, setNestedReplies] = useState<Record<string, ReplyType[]>>({});
   const { refetch: refetchRatings } = useUserRatings();
@@ -63,7 +64,12 @@ export function MessageDetailPage() {
     skip: !id,
   });
 
-  const { addReply, isLoading: contentLoading } = useContent({
+  const {
+    addReply,
+    removeMessage,
+    removeReply,
+    isLoading: contentLoading,
+  } = useContent({
     contentId: id,
     contentType: 'message',
     onSuccess: () => refetchReplies(),
@@ -119,6 +125,39 @@ export function MessageDetailPage() {
     }
   };
 
+  const handleDeleteMessage = async () => {
+    if (!id) {
+      return;
+    }
+
+    const success = await removeMessage(id);
+    if (success) {
+      // Navigate back to the channel
+      const channelId = messageData?.message?.channel?.id;
+      if (channelId) {
+        navigate(`/channel/${channelId}`);
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  };
+
+  const handleDeleteReply = async (replyId: string) => {
+    const success = await removeReply(replyId);
+
+    if (success) {
+      // Refetch replies to update the UI
+      refetchReplies();
+
+      // If this was a nested reply, refetch the parent's nested replies
+      Object.keys(nestedReplies).forEach((parentId) => {
+        if (nestedReplies[parentId].some((reply) => reply.id === replyId)) {
+          fetchNestedReplies(parentId);
+        }
+      });
+    }
+  };
+
   const renderReplies = (replies: ReplyType[], level = 0) => {
     return (
       <Stack gap="xs">
@@ -135,6 +174,7 @@ export function MessageDetailPage() {
               level={level}
               onReply={handleReplyClick}
               onSubmitNestedReply={handleNestedReply}
+              onDelete={() => handleDeleteReply(reply.id)}
             >
               {nestedReplies[reply.id] &&
                 nestedReplies[reply.id].length > 0 &&
@@ -218,6 +258,7 @@ export function MessageDetailPage() {
           negativeRatings={message.negativeRatings}
           contentType="message"
           onRatingChange={refetchRatings}
+          onDelete={handleDeleteMessage}
         />
 
         <Group justify="space-between" mb="md">

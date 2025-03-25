@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Avatar, Box, Divider, Group, Paper, Text } from '@mantine/core';
 import { formatDateTime } from '../../utils/dateUtils';
+import { DeleteButton } from '../DeleteButton/DeleteButton';
 import { RatingButtons } from '../RatingButtons';
 
 interface ContentCardProps {
@@ -17,6 +18,7 @@ interface ContentCardProps {
   negativeRatings: number;
   contentType: 'message' | 'reply' | 'channel';
   onRatingChange: () => void;
+  onDelete?: () => Promise<void>;
   children?: ReactNode;
   variant?: 'primary' | 'secondary';
 }
@@ -31,6 +33,7 @@ export function ContentCard({
   negativeRatings,
   contentType,
   onRatingChange,
+  onDelete,
   children,
   variant = 'primary',
 }: ContentCardProps) {
@@ -68,7 +71,17 @@ export function ContentCard({
           negativeCount={negativeRatings}
           onRatingChange={onRatingChange}
         />
-        {children}
+        <Group>
+          {onDelete && contentType !== 'channel' && (
+            <DeleteButton
+              contentType={contentType}
+              authorId={author.id}
+              onDelete={onDelete}
+              size={variant === 'primary' ? 'sm' : 'xs'}
+            />
+          )}
+          {children}
+        </Group>
       </Group>
     </Paper>
   );
