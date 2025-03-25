@@ -3,11 +3,9 @@ import { useMutation, useQuery } from '@apollo/client';
 import { Link, useParams } from 'react-router-dom';
 import {
   Alert,
-  Avatar,
   Box,
   Button,
   Container,
-  Divider,
   Group,
   Loader,
   Paper,
@@ -17,7 +15,7 @@ import {
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { AppShell } from '../components/AppShell';
-import { RatingButtons } from '../components/RatingButtons';
+import { ContentCard } from '../components/ContentCard';
 import { Reply } from '../components/Reply';
 import { ReplyForm } from '../components/ReplyForm';
 import {
@@ -26,9 +24,9 @@ import {
   GET_NESTED_REPLIES,
   GET_REPLIES_BY_MESSAGE,
 } from '../graphql/message';
+import { useContent } from '../hooks/useContent';
 import { useUserRatings } from '../hooks/useUserRatings';
 import { client } from '../lib/apolloClient';
-import { formatDateTime } from '../utils/dateUtils';
 
 interface ReplyType {
   id: string;
@@ -45,72 +43,11 @@ interface ReplyType {
   replies: { id: string }[];
 }
 
-interface MessageContent {
-  id: string;
-  content: string;
-  screenshot?: string;
-  createdAt: string;
-  positiveRatings: number;
-  negativeRatings: number;
-  author: {
-    id: string;
-    displayName: string;
-    avatar?: string;
-  };
-  channel: {
-    id: string;
-    name: string;
-  };
-}
-
-function MessageHeader({ message }: { message: MessageContent }) {
-  const { refetch: refetchRatings } = useUserRatings();
-
-  return (
-    <Paper withBorder p="md" mb="xl" radius="md">
-      <Group gap="sm" mb="xs">
-        <Avatar color="blue" radius="xl">
-          {message.author.displayName[0]}
-        </Avatar>
-        <div>
-          <Text fw={500}>{message.author.displayName}</Text>
-          <Text size="xs" c="dimmed">
-            {formatDateTime(message.createdAt)}
-          </Text>
-        </div>
-      </Group>
-
-      <Text size="lg" my="md">
-        {message.content}
-      </Text>
-
-      {message.screenshot && (
-        <Box my="md">
-          <img
-            src={message.screenshot}
-            alt="Screenshot"
-            style={{ maxWidth: '100%', maxHeight: '300px' }}
-          />
-        </Box>
-      )}
-
-      <Divider my="sm" />
-
-      <RatingButtons
-        contentId={message.id}
-        contentType="message"
-        positiveCount={message.positiveRatings}
-        negativeCount={message.negativeRatings}
-        onRatingChange={refetchRatings}
-      />
-    </Paper>
-  );
-}
-
 export function MessageDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [nestedReplies, setNestedReplies] = useState<Record<string, ReplyType[]>>({});
+  const { refetch: refetchRatings } = useUserRatings();
 
   const {
     loading: messageLoading,
@@ -131,7 +68,12 @@ export function MessageDetailPage() {
     skip: !id,
   });
 
-  const [createReply, { loading: createLoading }] = useMutation(CREATE_REPLY);
+  const [_createReply, { loading: createLoading }] = useMutation(CREATE_REPLY);
+  const { addReply, replyLoading } = useContent({
+    contentId: id,
+    contentType: 'message',
+    onSuccess: () => refetchReplies(),
+  });
 
   const fetchNestedReplies = async (parentReplyId: string) => {
     try {
@@ -160,34 +102,11 @@ export function MessageDetailPage() {
       return;
     }
 
-    try {
-      await createReply({
-        variables: {
-          messageId: id,
-          content,
-          parentReplyId: replyingTo || undefined,
-        },
-      });
+    const success = await addReply(content, replyingTo || undefined);
 
-      notifications.show({
-        title: 'Success',
-        message: 'Reply posted successfully',
-        color: 'green',
-      });
-
-      if (replyingTo) {
-        // Refetch nested replies if replying to a reply
-        fetchNestedReplies(replyingTo);
-        setReplyingTo(null);
-      } else {
-        refetchReplies();
-      }
-    } catch (error) {
-      notifications.show({
-        title: 'Error',
-        message: error instanceof Error ? error.message : 'Failed to post reply',
-        color: 'red',
-      });
+    if (success && replyingTo) {
+      fetchNestedReplies(replyingTo);
+      setReplyingTo(null);
     }
   };
 
@@ -196,33 +115,10 @@ export function MessageDetailPage() {
   };
 
   const handleNestedReply = async (content: string, parentReplyId: string) => {
-    if (!id) {
-      return;
-    }
+    const success = await addReply(content, parentReplyId);
 
-    try {
-      await createReply({
-        variables: {
-          messageId: id,
-          content,
-          parentReplyId,
-        },
-      });
-
-      notifications.show({
-        title: 'Success',
-        message: 'Reply posted successfully',
-        color: 'green',
-      });
-
-      // Refetch nested replies for this parent
+    if (success) {
       fetchNestedReplies(parentReplyId);
-    } catch (error) {
-      notifications.show({
-        title: 'Error',
-        message: error instanceof Error ? error.message : 'Failed to post reply',
-        color: 'red',
-      });
     }
   };
 
@@ -311,7 +207,17 @@ export function MessageDetailPage() {
           </Button>
         </Group>
 
-        <MessageHeader message={message} />
+        <ContentCard
+          id={message.id}
+          content={message.content}
+          screenshot={message.screenshot}
+          createdAt={message.createdAt}
+          author={message.author}
+          positiveRatings={message.positiveRatings}
+          negativeRatings={message.negativeRatings}
+          contentType="message"
+          onRatingChange={refetchRatings}
+        />
 
         <Group justify="space-between" mb="md">
           <Title order={3}>
@@ -330,7 +236,7 @@ export function MessageDetailPage() {
             onSubmit={handleSubmitReply}
             onCancel={() => {}}
             initialContent=""
-            isLoading={createLoading}
+            isLoading={createLoading || replyLoading}
           />
         </Paper>
 
