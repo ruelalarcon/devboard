@@ -1,11 +1,13 @@
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { Link, useParams } from 'react-router-dom';
 import { Alert, Box, Button, Container, Group, Loader, Stack, Tabs, Text } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { AppShell } from '../components/AppShell';
 import { ChannelCard } from '../components/ChannelCard';
 import { ContentCard } from '../components/ContentCard';
 import { UserCard } from '../components/UserCard';
-import { GET_USER_PROFILE } from '../graphql/user';
+import { useAuth } from '../contexts/AuthContext';
+import { GET_USER_PROFILE, UPDATE_USER } from '../graphql/user';
 
 interface Channel {
   id: string;
@@ -58,11 +60,36 @@ interface User {
 
 export function UserProfilePage() {
   const { id } = useParams<{ id: string }>();
+  const { user: currentUser } = useAuth();
 
-  const { data, loading, error } = useQuery(GET_USER_PROFILE, {
+  // Check if viewing own profile
+  const isOwnProfile = currentUser?.id === id;
+
+  const { data, loading, error, refetch } = useQuery(GET_USER_PROFILE, {
     variables: { id },
     fetchPolicy: 'network-only',
   });
+
+  const [updateUser] = useMutation(UPDATE_USER);
+
+  const handleAvatarUpdate = async (avatarUrl: string) => {
+    try {
+      await updateUser({
+        variables: {
+          avatar: avatarUrl,
+        },
+      });
+
+      // Refetch the user data
+      await refetch();
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: error instanceof Error ? error.message : 'Failed to update avatar',
+        color: 'red',
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -107,6 +134,8 @@ export function UserProfilePage() {
           createdAt={user.createdAt}
           isAdmin={user.isAdmin}
           withButton={false}
+          canEditAvatar={isOwnProfile}
+          onAvatarUpdate={isOwnProfile ? handleAvatarUpdate : undefined}
         />
 
         <Tabs defaultValue="channels" style={{ marginTop: '20px' }}>

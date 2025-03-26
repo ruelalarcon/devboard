@@ -81,3 +81,15 @@ export const GET_CONTENT_BY_USER = gql`
     }
   }
 `;
+
+export const UPDATE_USER = gql`
+  mutation UpdateUser($displayName: String, $avatar: String) {
+    updateUser(displayName: $displayName, avatar: $avatar) {
+      id
+      username
+      displayName
+      avatar
+      isAdmin
+    }
+  }
+`;

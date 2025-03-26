@@ -59,7 +59,7 @@ exports.uploadFile = (req, res) => {
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: "No file uploaded",
+        message: "No file uploaded or file type not allowed",
       });
     }
 
@@ -73,9 +73,10 @@ exports.uploadFile = (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Upload error:", error);
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "An error occurred during file upload",
     });
   }
 };

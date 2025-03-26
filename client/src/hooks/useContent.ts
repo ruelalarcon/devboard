@@ -54,7 +54,20 @@ export function useContent({ contentId, contentType: _contentType, onSuccess }: 
         body: formData,
       });
 
-      const data = await response.json();
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        // Handle non-JSON responses
+        const text = await response.text();
+        notifications.show({
+          title: 'Error',
+          message: `Server returned an invalid response format: ${text.substring(0, 100)}`,
+          color: 'red',
+        });
+        throw new Error('Server returned an invalid response format');
+      }
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to upload image');
