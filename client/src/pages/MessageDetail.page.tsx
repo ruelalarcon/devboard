@@ -138,7 +138,7 @@ export function MessageDetailPage() {
       if (channelId) {
         navigate(`/channel/${channelId}`);
       } else {
-        navigate('/dashboard');
+        navigate('/home');
       }
     }
   };

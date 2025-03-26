@@ -119,8 +119,8 @@ export function ChannelDetailPage() {
     <AppShell>
       <Container>
         <Group mb="md">
-          <Button component={Link} to="/dashboard" variant="subtle" size="sm">
-            ← Back to Dashboard
+          <Button component={Link} to="/home" variant="subtle" size="sm">
+            ← Back to Home
           </Button>
         </Group>
 

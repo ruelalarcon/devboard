@@ -2,8 +2,8 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { Center, Loader } from '@mantine/core';
 import { useAuth } from './contexts/AuthContext';
 import { ChannelDetailPage } from './pages/ChannelDetail.page';
-import { DashboardPage } from './pages/Dashboard.page';
 import { HomePage } from './pages/Home.page';
+import { IndexPage } from './pages/Index.page';
 import { LoginPage } from './pages/Login.page';
 import { MessageDetailPage } from './pages/MessageDetail.page';
 import { RegisterPage } from './pages/Register.page';
@@ -46,7 +46,7 @@ function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
 
   // Only redirect if we're sure the user is logged in
   if (user) {
-    return <Navigate to="/dashboard" />;
+    return <Navigate to="/home" />;
   }
 
   return <>{children}</>;
@@ -56,7 +56,7 @@ export function AppRouter() {
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <HomePage />,
+      element: <IndexPage />,
     },
     {
       path: '/register',
@@ -75,10 +75,10 @@ export function AppRouter() {
       ),
     },
     {
-      path: '/dashboard',
+      path: '/home',
       element: (
         <ProtectedRoute>
-          <DashboardPage />
+          <HomePage />
         </ProtectedRoute>
       ),
     },

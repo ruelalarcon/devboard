@@ -35,7 +35,7 @@ export function LoginPage() {
 
     try {
       await login(values.username, values.password);
-      navigate('/dashboard');
+      navigate('/home');
       notifications.show({
         title: 'Success',
         message: 'You have been logged in successfully',

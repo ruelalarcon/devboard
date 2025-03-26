@@ -33,7 +33,7 @@ function Header({
       <Group>
         <Burger opened={opened} onClick={onToggle} hiddenFrom="sm" size="sm" />
         <Box visibleFrom="sm">
-          <Link to="/dashboard" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Link to="/home" style={{ textDecoration: 'none', color: 'inherit' }}>
             <Title order={3}>Programming Channel</Title>
           </Link>
         </Box>
@@ -66,8 +66,7 @@ export function AppShell({ children }: AppShellProps) {
     navigate('/');
   };
 
-  const isDashboardActive =
-    location.pathname === '/dashboard' || location.pathname.startsWith('/channel/');
+  const isHomeActive = location.pathname === '/home' || location.pathname.startsWith('/channel/');
 
   return (
     <MantineAppShell
@@ -85,10 +84,10 @@ export function AppShell({ children }: AppShellProps) {
 
       <MantineAppShell.Navbar p="md">
         <NavLink
-          label="Dashboard"
+          label="Home"
           component={Link}
-          to="/dashboard"
-          active={isDashboardActive}
+          to="/home"
+          active={isHomeActive}
           style={{
             borderRadius: '.25rem',
           }}

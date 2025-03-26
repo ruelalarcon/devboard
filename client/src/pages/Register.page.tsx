@@ -41,7 +41,7 @@ export function RegisterPage() {
 
     try {
       await register(values.username, values.password, values.displayName);
-      navigate('/dashboard');
+      navigate('/home');
       notifications.show({
         title: 'Success',
         message: 'Your account has been created successfully',
