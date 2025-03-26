@@ -1,5 +1,6 @@
 const { GraphQLError } = require("graphql");
 const { Op } = require("sequelize");
+const { sanitizeContent } = require("../../utils/sanitizer");
 
 // Helper function to create errors with specific codes
 const createError = (message, code) => {
@@ -38,9 +39,12 @@ module.exports = {
         throw createError("Channel not found", "NOT_FOUND");
       }
 
+      // Sanitize content
+      const sanitizedContent = sanitizeContent(content);
+
       // Create message
       const message = await db.Message.create({
-        content,
+        content: sanitizedContent,
         screenshot,
         userId: req.session.userId,
         channelId,
@@ -68,7 +72,7 @@ module.exports = {
       }
 
       // Update fields if provided
-      if (content !== undefined) message.content = content;
+      if (content !== undefined) message.content = sanitizeContent(content);
       if (screenshot !== undefined) message.screenshot = screenshot;
 
       await message.save();

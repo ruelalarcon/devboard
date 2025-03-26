@@ -8,7 +8,7 @@ interface ContentBlock {
 
 export function parseContent(content: string): ContentBlock[] {
   const blocks: ContentBlock[] = [];
-  // Match code blocks first
+  // Match code blocks first - using a new regex to capture multi-line code blocks precisely
   const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
   let lastIndex = 0;
   let match;
@@ -20,14 +20,26 @@ export function parseContent(content: string): ContentBlock[] {
       parseTextBlocks(textBeforeCode, blocks);
     }
 
+    // Get the code content, trimming any trailing newline before the closing backticks
+    let codeContent = match[2];
+    if (codeContent.endsWith('\n')) {
+      codeContent = codeContent.slice(0, -1);
+    }
+
     // Add code block
     blocks.push({
       type: 'code',
-      content: match[2], // The code content
+      content: codeContent,
       language: match[1] || 'plaintext', // The language specified after ``` or default to plaintext
     });
 
     lastIndex = match.index + match[0].length;
+
+    // If the code block is followed immediately by a newline, consume it
+    // This prevents an extra blank line after code blocks
+    if (lastIndex < content.length && content[lastIndex] === '\n') {
+      lastIndex++;
+    }
   }
 
   // Add remaining text after last code block if any
@@ -71,15 +83,30 @@ function parseTextBlocks(text: string, blocks: ContentBlock[]): void {
         currentBlock.items.push(listItemContent);
       }
     }
-    // Check for blockquote
-    else if (line.startsWith('> ')) {
+    // Check for blockquote - match both Markdown style (> text) and potential HTML style
+    else if (line.trim().startsWith('> ') || line.includes('<blockquote>')) {
       // If we were in a non-blockquote block, push it
       if (currentBlock && currentBlock.type !== 'blockquote') {
         blocks.push(currentBlock);
         currentBlock = null;
       }
 
-      const quoteContent = line.substring(2); // Remove '> ' prefix
+      let quoteContent = '';
+
+      // Handle HTML blockquote if present
+      if (line.includes('<blockquote>')) {
+        // Extract content between blockquote tags
+        const match = line.match(/<blockquote>(.*?)<\/blockquote>/);
+        if (match) {
+          quoteContent = match[1];
+        } else {
+          // Handle opening tag without closing tag
+          quoteContent = line.replace(/<blockquote>/g, '').replace(/<\/blockquote>/g, '');
+        }
+      } else {
+        // Handle Markdown blockquote format
+        quoteContent = line.substring(line.indexOf('> ') + 2);
+      }
 
       // If we don't have a current blockquote, create one
       if (!currentBlock) {

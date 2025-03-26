@@ -1,4 +1,5 @@
 const { GraphQLError } = require("graphql");
+const { sanitizeContent } = require("../../utils/sanitizer");
 
 // Helper function to create errors with specific codes
 const createError = (message, code) => {
@@ -26,11 +27,22 @@ module.exports = {
         throw createError("You must be logged in", "UNAUTHENTICATED");
       }
 
+      // Check if channel name already exists
+      const existingChannel = await db.Channel.findOne({ where: { name } });
+      if (existingChannel) {
+        throw createError("Channel name already exists", "BAD_USER_INPUT");
+      }
+
+      // Sanitize description if provided
+      const sanitizedDescription = description
+        ? sanitizeContent(description)
+        : null;
+
       // Create channel
       const channel = await db.Channel.create({
         name,
-        description,
-        createdBy: req.session.userId,
+        description: sanitizedDescription,
+        userId: req.session.userId,
       });
 
       return channel;
@@ -50,13 +62,23 @@ module.exports = {
 
       // Authorization check (admin or creator)
       const user = await db.User.findByPk(req.session.userId);
-      if (!user.isAdmin && channel.createdBy !== user.id) {
+      if (!user.isAdmin && channel.userId !== user.id) {
         throw createError("Not authorized", "FORBIDDEN");
       }
 
-      // Update fields if provided
-      if (name) channel.name = name;
-      if (description !== undefined) channel.description = description;
+      // If updating name, check if it already exists
+      if (name && name !== channel.name) {
+        const existingChannel = await db.Channel.findOne({ where: { name } });
+        if (existingChannel) {
+          throw createError("Channel name already exists", "BAD_USER_INPUT");
+        }
+        channel.name = name;
+      }
+
+      // Update description if provided
+      if (description !== undefined) {
+        channel.description = description ? sanitizeContent(description) : null;
+      }
 
       await channel.save();
       return channel;

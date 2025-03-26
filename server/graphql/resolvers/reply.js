@@ -1,4 +1,5 @@
 const { GraphQLError } = require("graphql");
+const { sanitizeContent } = require("../../utils/sanitizer");
 
 // Helper function to create errors with specific codes
 const createError = (message, code) => {
@@ -37,30 +38,34 @@ module.exports = {
         throw createError("You must be logged in", "UNAUTHENTICATED");
       }
 
+      // Sanitize content
+      const sanitizedContent = sanitizeContent(content);
+
       // Check if message exists
-      const message = await db.Message.findByPk(messageId);
-      if (!message) {
-        throw createError("Message not found", "NOT_FOUND");
+      let message = null;
+      if (messageId) {
+        message = await db.Message.findByPk(messageId);
+        if (!message) {
+          throw createError("Message not found", "NOT_FOUND");
+        }
       }
 
-      // If parentReplyId is provided, check if it exists
+      // If replying to a reply, check if that reply exists
+      let parentReply = null;
       if (parentReplyId) {
-        const parentReply = await db.Reply.findByPk(parentReplyId);
+        parentReply = await db.Reply.findByPk(parentReplyId);
         if (!parentReply) {
           throw createError("Parent reply not found", "NOT_FOUND");
         }
-        // Make sure parent reply belongs to the same message
-        if (parentReply.messageId !== parseInt(messageId)) {
-          throw createError(
-            "Parent reply does not belong to the specified message",
-            "BAD_USER_INPUT"
-          );
+        // If parent reply is provided, get its message ID
+        if (!messageId) {
+          messageId = parentReply.messageId;
         }
       }
 
       // Create reply
       const reply = await db.Reply.create({
-        content,
+        content: sanitizedContent,
         screenshot,
         userId: req.session.userId,
         messageId,
@@ -89,7 +94,7 @@ module.exports = {
       }
 
       // Update fields if provided
-      if (content !== undefined) reply.content = content;
+      if (content !== undefined) reply.content = sanitizeContent(content);
       if (screenshot !== undefined) reply.screenshot = screenshot;
 
       await reply.save();
