@@ -72,41 +72,64 @@ const AuthContext = createContext<AuthContextType | null>(null);
 // Provider component
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   // Get current user
-  const { loading, error } = useQuery(CURRENT_USER, {
+  const {
+    loading: queryLoading,
+    error,
+    refetch,
+  } = useQuery(CURRENT_USER, {
     onCompleted: (data: { me: User | null }) => {
       if (data?.me) {
         setUser(data.me);
+      }
+      if (!authInitialized) {
+        setAuthInitialized(true);
+      }
+    },
+    onError: () => {
+      if (!authInitialized) {
+        setAuthInitialized(true);
       }
     },
     fetchPolicy: 'network-only', // Don't use cache for this query
   });
 
   // Login mutation
-  const [loginMutation] = useMutation(LOGIN);
+  const [loginMutation, { loading: loginLoading }] = useMutation(LOGIN);
   const login = async (username: string, password: string) => {
     const { data } = await loginMutation({ variables: { username, password } });
     if (data?.login?.user) {
       setUser(data.login.user);
+      // Refresh Apollo cache with current user data
+      await refetch();
     }
   };
 
   // Register mutation
-  const [registerMutation] = useMutation(REGISTER);
+  const [registerMutation, { loading: registerLoading }] = useMutation(REGISTER);
   const register = async (username: string, password: string, displayName: string) => {
     const { data } = await registerMutation({ variables: { username, password, displayName } });
     if (data?.register?.user) {
       setUser(data.register.user);
+      // Refresh Apollo cache with current user data
+      await refetch();
     }
   };
 
   // Logout mutation
-  const [logoutMutation] = useMutation(LOGOUT);
+  const [logoutMutation, { loading: logoutLoading }] = useMutation(LOGOUT);
   const logout = async () => {
     await logoutMutation();
     setUser(null);
+    // Clear Apollo cache to remove any user-specific data
+    await refetch();
   };
+
+  // Combined loading state
+  const loading =
+    queryLoading || loginLoading || registerLoading || logoutLoading || !authInitialized;
 
   // Expose the context
   const value = {

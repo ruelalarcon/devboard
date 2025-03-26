@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
-import { Link } from 'react-router-dom';
 import {
   Alert,
   Button,
-  Card,
   Container,
   Group,
   Loader,
@@ -18,8 +16,8 @@ import {
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { AppShell } from '../components/AppShell';
+import { ChannelCard } from '../components/ChannelCard';
 import { CREATE_CHANNEL, GET_CHANNELS } from '../graphql/channel';
-import { formatDate } from '../utils/dateUtils';
 
 interface Channel {
   id: string;
@@ -95,24 +93,14 @@ export function DashboardPage() {
               </Text>
             ) : (
               data.channels.map((channel: Channel) => (
-                <Card key={channel.id} withBorder shadow="sm" p="lg" radius="md">
-                  <Group justify="space-between">
-                    <div>
-                      <Title order={4}>{channel.name}</Title>
-                      {channel.description && <Text>{channel.description}</Text>}
-                      <Text size="sm" c="dimmed">
-                        Created by{' '}
-                        <Link to={`/user/${channel.creator.id}`}>
-                          {channel.creator.displayName}
-                        </Link>{' '}
-                        on {formatDate(channel.createdAt)}
-                      </Text>
-                    </div>
-                    <Button component={Link} to={`/channel/${channel.id}`} variant="outline">
-                      View Channel
-                    </Button>
-                  </Group>
-                </Card>
+                <ChannelCard
+                  key={channel.id}
+                  id={channel.id}
+                  name={channel.name}
+                  description={channel.description}
+                  createdAt={channel.createdAt}
+                  creator={channel.creator}
+                />
               ))
             )}
           </Stack>

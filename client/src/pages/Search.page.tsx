@@ -3,10 +3,8 @@ import { useLazyQuery } from '@apollo/client';
 import { Link } from 'react-router-dom';
 import {
   Alert,
-  Avatar,
   Box,
   Button,
-  Card,
   Container,
   Divider,
   Group,
@@ -21,9 +19,10 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { AppShell } from '../components/AppShell';
+import { ChannelCard } from '../components/ChannelCard';
 import { ContentCard } from '../components/ContentCard';
+import { UserCard } from '../components/UserCard';
 import { SEARCH_CHANNELS, SEARCH_MESSAGES, SEARCH_USERS } from '../graphql/search';
-import { formatDate } from '../utils/dateUtils';
 
 type SearchType = 'channels' | 'messages' | 'users';
 
@@ -97,22 +96,14 @@ export function SearchPage() {
     return (
       <Stack>
         {channels.map((channel: any) => (
-          <Card key={channel.id} withBorder shadow="sm" p="lg">
-            <Group justify="space-between">
-              <div>
-                <Title order={4}>{channel.name}</Title>
-                {channel.description && <Text>{channel.description}</Text>}
-                <Text size="sm" c="dimmed">
-                  Created by{' '}
-                  <Link to={`/user/${channel.creator.id}`}>{channel.creator.displayName}</Link> on{' '}
-                  {formatDate(channel.createdAt)}
-                </Text>
-              </div>
-              <Button component={Link} to={`/channel/${channel.id}`} variant="outline">
-                View Channel
-              </Button>
-            </Group>
-          </Card>
+          <ChannelCard
+            key={channel.id}
+            id={channel.id}
+            name={channel.name}
+            description={channel.description}
+            createdAt={channel.createdAt}
+            creator={channel.creator}
+          />
         ))}
       </Stack>
     );
@@ -173,29 +164,14 @@ export function SearchPage() {
     return (
       <Stack>
         {users.map((user: any) => (
-          <Card key={user.id} withBorder shadow="sm" p="lg">
-            <Group>
-              <Link to={`/user/${user.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <Avatar src={user.avatar} radius="xl" size="lg" color="blue">
-                  {user.displayName ? user.displayName.charAt(0).toUpperCase() : '?'}
-                </Avatar>
-              </Link>
-              <div>
-                <Link to={`/user/${user.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <Title order={4}>{user.displayName}</Title>
-                  <Text size="sm" c="dimmed">
-                    @{user.username}
-                  </Text>
-                </Link>
-                <Text size="sm" c="dimmed">
-                  Joined on {formatDate(user.createdAt)}
-                </Text>
-              </div>
-              <Button component={Link} to={`/user/${user.id}`} ml="auto" variant="outline">
-                View Profile
-              </Button>
-            </Group>
-          </Card>
+          <UserCard
+            key={user.id}
+            id={user.id}
+            displayName={user.displayName}
+            username={user.username}
+            avatar={user.avatar}
+            createdAt={user.createdAt}
+          />
         ))}
       </Stack>
     );

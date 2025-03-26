@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
+import { Center, Loader } from '@mantine/core';
 import { useAuth } from './contexts/AuthContext';
 import { ChannelDetailPage } from './pages/ChannelDetail.page';
 import { DashboardPage } from './pages/Dashboard.page';
@@ -13,9 +14,16 @@ import { UserProfilePage } from './pages/UserProfile.page';
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
+  // Show loading state while auth is being determined
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <Center style={{ width: '100%', height: '100vh' }}>
+        <Loader size="xl" />
+      </Center>
+    );
   }
+
+  // Only redirect if we're not loading and the user is definitely not authenticated
   if (!user) {
     return <Navigate to="/login" />;
   }
@@ -27,9 +35,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
+  // Show loading state while auth is being determined
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <Center style={{ width: '100%', height: '100vh' }}>
+        <Loader size="xl" />
+      </Center>
+    );
   }
+
+  // Only redirect if we're sure the user is logged in
   if (user) {
     return <Navigate to="/dashboard" />;
   }

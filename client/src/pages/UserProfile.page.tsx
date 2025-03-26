@@ -1,23 +1,11 @@
 import { useQuery } from '@apollo/client';
 import { Link, useParams } from 'react-router-dom';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  Container,
-  Group,
-  Loader,
-  Stack,
-  Tabs,
-  Text,
-  Title,
-} from '@mantine/core';
+import { Alert, Box, Button, Container, Group, Loader, Stack, Tabs, Text } from '@mantine/core';
 import { AppShell } from '../components/AppShell';
+import { ChannelCard } from '../components/ChannelCard';
 import { ContentCard } from '../components/ContentCard';
+import { UserCard } from '../components/UserCard';
 import { GET_USER_PROFILE } from '../graphql/user';
-import { formatDate } from '../utils/dateUtils';
 
 interface Channel {
   id: string;
@@ -65,6 +53,7 @@ interface User {
   channels: Channel[];
   messages: Message[];
   replies: Reply[];
+  createdAt: string;
 }
 
 export function UserProfilePage() {
@@ -110,24 +99,17 @@ export function UserProfilePage() {
   return (
     <AppShell>
       <Container>
-        <Card withBorder p="xl" radius="md" mb="xl">
-          <Group>
-            <Avatar color="blue" radius="xl" size="xl">
-              {user.displayName[0]}
-            </Avatar>
-            <div>
-              <Title order={2}>{user.displayName}</Title>
-              <Text c="dimmed">@{user.username}</Text>
-              {user.isAdmin && (
-                <Text size="sm" c="blue" fw={500}>
-                  Administrator
-                </Text>
-              )}
-            </div>
-          </Group>
-        </Card>
+        <UserCard
+          id={user.id}
+          displayName={user.displayName}
+          username={user.username}
+          avatar={user.avatar}
+          createdAt={user.createdAt}
+          isAdmin={user.isAdmin}
+          withButton={false}
+        />
 
-        <Tabs defaultValue="channels">
+        <Tabs defaultValue="channels" style={{ marginTop: '20px' }}>
           <Tabs.List>
             <Tabs.Tab value="channels">Channels ({user.channels.length})</Tabs.Tab>
             <Tabs.Tab value="messages">Messages ({user.messages.length})</Tabs.Tab>
@@ -140,24 +122,14 @@ export function UserProfilePage() {
             ) : (
               <Stack>
                 {user.channels.map((channel: Channel) => (
-                  <Card key={channel.id} withBorder p="md">
-                    <Link
-                      to={`/channel/${channel.id}`}
-                      style={{ textDecoration: 'none', color: 'inherit' }}
-                    >
-                      <Text fw={500} size="lg">
-                        {channel.name}
-                      </Text>
-                      {channel.description && (
-                        <Text c="dimmed" size="sm">
-                          {channel.description}
-                        </Text>
-                      )}
-                      <Text size="xs" c="dimmed" mt="sm">
-                        Created on {formatDate(channel.createdAt)}
-                      </Text>
-                    </Link>
-                  </Card>
+                  <ChannelCard
+                    key={channel.id}
+                    id={channel.id}
+                    name={channel.name}
+                    description={channel.description}
+                    createdAt={channel.createdAt}
+                    compact
+                  />
                 ))}
               </Stack>
             )}
