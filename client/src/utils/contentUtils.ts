@@ -141,16 +141,37 @@ function parseTextBlocks(text: string, blocks: ContentBlock[]): void {
 
 // Function to format inline markdown for rendering
 export function formatInlineMarkdown(text: string): string {
-  // Replace markdown patterns with HTML tags
-  return (
-    text
-      // Bold: **text** or __text__
-      .replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>')
-      // Italic: *text* or _text_
-      .replace(/(\*|_)(.*?)\1/g, '<em>$2</em>')
-      // Strikethrough: ~~text~~
-      .replace(/~~(.*?)~~/g, '<del>$1</del>')
-      // Inline code: `text`
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-  );
+  // First, we need to temporarily replace any code blocks to avoid formatting inside them
+  const codeSnippets: string[] = [];
+
+  // Use a unique character sequence that's unlikely to appear in normal text
+  const textWithoutCode = text.replace(/`([^`]+)`/g, (_match, code) => {
+    const index = codeSnippets.push(code) - 1;
+    return `§CODE§${index}§`;
+  });
+
+  // Process the text for markdown and URLs
+  let processed = textWithoutCode
+    // Bold + Italic: ***text*** (must process this before bold and italic)
+    .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    // Bold: **text** or __text__
+    .replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>')
+    // Italic: *text* or _text_
+    .replace(/(\*|_)(.*?)\1/g, '<em>$2</em>')
+    // Strikethrough: ~~text~~
+    .replace(/~~(.*?)~~/g, '<del>$1</del>')
+    // URLs (http, https, ftp)
+    .replace(
+      /(https?:\/\/|ftp:\/\/)(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/gi,
+      '<a href="$&" target="_blank" rel="noopener noreferrer">$&</a>'
+    );
+
+  // Restore code blocks with a simpler approach to avoid regex issues
+  for (let i = 0; i < codeSnippets.length; i++) {
+    const placeholder = `§CODE§${i}§`;
+    const replacement = `<code>${codeSnippets[i]}</code>`;
+    processed = processed.replace(placeholder, replacement);
+  }
+
+  return processed;
 }
