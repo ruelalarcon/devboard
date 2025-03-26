@@ -96,7 +96,7 @@ export function ContentCard({
           <img
             src={screenshot}
             alt="Screenshot"
-            style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '0.25rem' }}
+            style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '0.25rem' }}
           />
         </Box>
       )}
