@@ -8,6 +8,7 @@ import {
   NavLink,
   Text,
   Title,
+  Box,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useAuth } from '../../contexts/AuthContext';
@@ -31,7 +32,9 @@ function Header({
     <Group justify="space-between">
       <Group>
         <Burger opened={opened} onClick={onToggle} hiddenFrom="sm" size="sm" />
-        <Title order={3}>Programming Channel</Title>
+        <Box visibleFrom="sm">
+          <Title order={3}>Programming Channel</Title>
+        </Box>
       </Group>
       {user && (
         <Group>
@@ -66,7 +69,7 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <MantineAppShell
-      header={{ height: 60 }}
+      header={{ height: 70 }}
       navbar={{
         width: 300,
         breakpoint: 'sm',
