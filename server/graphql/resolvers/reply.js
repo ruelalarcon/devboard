@@ -119,9 +119,56 @@ module.exports = {
         throw createError("Not authorized", "FORBIDDEN");
       }
 
-      // Delete reply
-      await reply.destroy();
-      return true;
+      // Use a transaction to ensure data consistency
+      const transaction = await db.sequelize.transaction();
+
+      try {
+        // Recursive function to delete a reply and all its nested replies
+        const deleteReplyAndChildren = async (replyId) => {
+          // Find child replies
+          const childReplies = await db.Reply.findAll({
+            where: { parentReplyId: replyId },
+            attributes: ["id"],
+            transaction,
+          });
+
+          // Recursively delete each child reply and its children
+          for (const childReply of childReplies) {
+            await deleteReplyAndChildren(childReply.id);
+          }
+
+          // Delete ratings for this reply
+          await db.Rating.destroy({
+            where: {
+              contentId: replyId,
+              contentType: "reply",
+            },
+            transaction,
+          });
+
+          // Delete the reply itself
+          await db.Reply.destroy({
+            where: { id: replyId },
+            transaction,
+          });
+        };
+
+        // Call the recursive function
+        await deleteReplyAndChildren(id);
+
+        // Commit the transaction
+        await transaction.commit();
+
+        return true;
+      } catch (error) {
+        // Rollback the transaction in case of error
+        await transaction.rollback();
+        console.error("Error during reply deletion:", error);
+        throw createError(
+          `Failed to delete reply: ${error.message}`,
+          "INTERNAL_SERVER_ERROR"
+        );
+      }
     },
   },
 

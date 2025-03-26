@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -7,15 +8,18 @@ import {
   Container,
   Group,
   Loader,
+  Modal,
   Paper,
   Stack,
   Text,
   Title,
 } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { AppShell } from '../components/AppShell';
 import { ContentCard } from '../components/ContentCard';
 import { ReplyForm } from '../components/ReplyForm';
-import { GET_CHANNEL } from '../graphql/channel';
+import { useAuth } from '../contexts/AuthContext';
+import { DELETE_CHANNEL, GET_CHANNEL } from '../graphql/channel';
 import { CREATE_MESSAGE, GET_MESSAGES_BY_CHANNEL } from '../graphql/message';
 import { useContent } from '../hooks/useContent';
 import { formatDate } from '../utils/dateUtils';
@@ -37,6 +41,12 @@ interface Message {
 
 export function ChannelDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  // Check if the current user is an admin
+  const isAdmin = user?.isAdmin || false;
 
   const {
     loading: channelLoading,
@@ -58,6 +68,8 @@ export function ChannelDetailPage() {
   });
 
   const [_createMessage, { loading: createLoading }] = useMutation(CREATE_MESSAGE);
+  const [deleteChannel] = useMutation(DELETE_CHANNEL);
+
   const {
     addMessage,
     removeMessage,
@@ -77,6 +89,43 @@ export function ChannelDetailPage() {
 
   const handleDeleteMessage = async (messageId: string) => {
     await removeMessage(messageId);
+  };
+
+  const handleOpenDeleteModal = () => {
+    setDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+  };
+
+  const handleDeleteChannel = async () => {
+    if (!id) {
+      return;
+    }
+
+    try {
+      await deleteChannel({
+        variables: {
+          id,
+        },
+      });
+
+      notifications.show({
+        title: 'Success',
+        message: 'Channel deleted successfully',
+        color: 'green',
+      });
+
+      // Navigate back to home
+      navigate('/home');
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: error instanceof Error ? error.message : 'Failed to delete channel',
+        color: 'red',
+      });
+    }
   };
 
   const loading = channelLoading || messagesLoading;
@@ -122,6 +171,11 @@ export function ChannelDetailPage() {
           <Button component={Link} to="/home" variant="subtle" size="sm">
             ← Back to Home
           </Button>
+          {isAdmin && (
+            <Button color="red" variant="subtle" size="sm" onClick={handleOpenDeleteModal}>
+              Delete Channel
+            </Button>
+          )}
         </Group>
 
         <Paper withBorder p="md" mb="xl">
@@ -176,6 +230,26 @@ export function ChannelDetailPage() {
             ))}
           </Stack>
         )}
+
+        {/* Delete Channel Confirmation Modal */}
+        <Modal
+          opened={deleteModalOpen}
+          onClose={handleCloseDeleteModal}
+          title="Confirm Channel Deletion"
+          centered
+        >
+          <Text mb="md">
+            Are you sure you want to delete this channel? This action cannot be undone.
+          </Text>
+          <Group justify="flex-end">
+            <Button variant="subtle" onClick={handleCloseDeleteModal}>
+              Cancel
+            </Button>
+            <Button color="red" onClick={handleDeleteChannel}>
+              Delete Channel
+            </Button>
+          </Group>
+        </Modal>
       </Container>
     </AppShell>
   );

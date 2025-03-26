@@ -102,9 +102,78 @@ module.exports = {
         throw createError("Not authorized", "FORBIDDEN");
       }
 
-      // Delete channel
-      await channel.destroy();
-      return true;
+      // Use a transaction to ensure data consistency
+      const transaction = await db.sequelize.transaction();
+
+      try {
+        // Step 1: Find all messages in this channel
+        const messages = await db.Message.findAll({
+          where: { channelId: id },
+          attributes: ["id"],
+          transaction,
+        });
+
+        const messageIds = messages.map((m) => m.id);
+
+        if (messageIds.length > 0) {
+          // Step 2: Find all replies to these messages
+          const replies = await db.Reply.findAll({
+            where: { messageId: messageIds },
+            attributes: ["id"],
+            transaction,
+          });
+
+          const replyIds = replies.map((r) => r.id);
+
+          // Step 3: Delete ratings for replies
+          if (replyIds.length > 0) {
+            await db.Rating.destroy({
+              where: {
+                contentId: replyIds,
+                contentType: "reply",
+              },
+              transaction,
+            });
+          }
+
+          // Step 4: Delete all replies to messages in this channel
+          await db.Reply.destroy({
+            where: { messageId: messageIds },
+            transaction,
+          });
+
+          // Step 5: Delete ratings for messages
+          await db.Rating.destroy({
+            where: {
+              contentId: messageIds,
+              contentType: "message",
+            },
+            transaction,
+          });
+        }
+
+        // Step 6: Delete all messages in this channel
+        await db.Message.destroy({
+          where: { channelId: id },
+          transaction,
+        });
+
+        // Step 7: Finally delete the channel
+        await channel.destroy({ transaction });
+
+        // Commit the transaction
+        await transaction.commit();
+
+        return true;
+      } catch (error) {
+        // Rollback the transaction in case of error
+        await transaction.rollback();
+        console.error("Error during channel deletion:", error);
+        throw createError(
+          `Failed to delete channel: ${error.message}`,
+          "INTERNAL_SERVER_ERROR"
+        );
+      }
     },
   },
 

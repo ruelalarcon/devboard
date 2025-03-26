@@ -97,9 +97,61 @@ module.exports = {
         throw createError("Not authorized", "FORBIDDEN");
       }
 
-      // Delete message
-      await message.destroy();
-      return true;
+      // Use a transaction to ensure data consistency
+      const transaction = await db.sequelize.transaction();
+
+      try {
+        // Step 1: Find all replies to this message
+        const replies = await db.Reply.findAll({
+          where: { messageId: id },
+          attributes: ["id"],
+          transaction,
+        });
+
+        const replyIds = replies.map((r) => r.id);
+
+        // Step 2: Delete ratings for replies
+        if (replyIds.length > 0) {
+          await db.Rating.destroy({
+            where: {
+              contentId: replyIds,
+              contentType: "reply",
+            },
+            transaction,
+          });
+        }
+
+        // Step 3: Delete all replies to this message
+        await db.Reply.destroy({
+          where: { messageId: id },
+          transaction,
+        });
+
+        // Step 4: Delete ratings for this message
+        await db.Rating.destroy({
+          where: {
+            contentId: id,
+            contentType: "message",
+          },
+          transaction,
+        });
+
+        // Step 5: Finally delete the message
+        await message.destroy({ transaction });
+
+        // Commit the transaction
+        await transaction.commit();
+
+        return true;
+      } catch (error) {
+        // Rollback the transaction in case of error
+        await transaction.rollback();
+        console.error("Error during message deletion:", error);
+        throw createError(
+          `Failed to delete message: ${error.message}`,
+          "INTERNAL_SERVER_ERROR"
+        );
+      }
     },
   },
 

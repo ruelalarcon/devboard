@@ -200,14 +200,94 @@ module.exports = {
         throw createError("User not found", "NOT_FOUND");
       }
 
-      await user.destroy();
+      // Use a transaction to ensure data consistency
+      const transaction = await db.sequelize.transaction();
 
-      // If deleted self, clear session
-      if (currentUser.id === id) {
-        req.session.destroy();
+      try {
+        // Step 1: Delete user's ratings
+        await db.Rating.destroy({
+          where: { userId: id },
+          transaction,
+        });
+
+        // Step 2: Delete ratings on user's content
+        // First, get all the user's messages and replies
+        const messages = await db.Message.findAll({
+          where: { userId: id },
+          attributes: ["id"],
+          transaction,
+        });
+
+        const replies = await db.Reply.findAll({
+          where: { userId: id },
+          attributes: ["id"],
+          transaction,
+        });
+
+        const messageIds = messages.map((m) => m.id);
+        const replyIds = replies.map((r) => r.id);
+
+        // Delete ratings for the user's messages
+        if (messageIds.length > 0) {
+          await db.Rating.destroy({
+            where: {
+              contentId: messageIds,
+              contentType: "message",
+            },
+            transaction,
+          });
+        }
+
+        // Delete ratings for the user's replies
+        if (replyIds.length > 0) {
+          await db.Rating.destroy({
+            where: {
+              contentId: replyIds,
+              contentType: "reply",
+            },
+            transaction,
+          });
+        }
+
+        // Step 3: Delete user's replies
+        await db.Reply.destroy({
+          where: { userId: id },
+          transaction,
+        });
+
+        // Step 4: Delete user's messages
+        await db.Message.destroy({
+          where: { userId: id },
+          transaction,
+        });
+
+        // Step 5: Delete user's channels
+        await db.Channel.destroy({
+          where: { createdBy: id },
+          transaction,
+        });
+
+        // Step 6: Finally delete the user
+        await user.destroy({ transaction });
+
+        // Commit the transaction
+        await transaction.commit();
+
+        // If deleted self, clear session
+        if (currentUser.id === id) {
+          req.session.destroy();
+        }
+
+        return true;
+      } catch (error) {
+        // Rollback the transaction in case of error
+        await transaction.rollback();
+        console.error("Error during user deletion:", error);
+        throw createError(
+          `Failed to delete user: ${error.message}`,
+          "INTERNAL_SERVER_ERROR"
+        );
       }
-
-      return true;
     },
   },
 

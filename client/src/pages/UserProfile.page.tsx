@@ -1,13 +1,26 @@
+import { useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
-import { Link, useParams } from 'react-router-dom';
-import { Alert, Box, Button, Container, Group, Loader, Stack, Tabs, Text } from '@mantine/core';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Group,
+  Loader,
+  Modal,
+  Stack,
+  Tabs,
+  Text,
+} from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { AppShell } from '../components/AppShell';
 import { ChannelCard } from '../components/ChannelCard';
 import { ContentCard } from '../components/ContentCard';
 import { UserCard } from '../components/UserCard';
 import { useAuth } from '../contexts/AuthContext';
-import { GET_USER_PROFILE, UPDATE_USER } from '../graphql/user';
+import { DELETE_CHANNEL } from '../graphql/channel';
+import { DELETE_USER, GET_USER_PROFILE, UPDATE_USER } from '../graphql/user';
 
 interface Channel {
   id: string;
@@ -61,9 +74,14 @@ interface User {
 export function UserProfilePage() {
   const { id } = useParams<{ id: string }>();
   const { user: currentUser } = useAuth();
+  const navigate = useNavigate();
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [channelToDelete, setChannelToDelete] = useState<string | null>(null);
 
   // Check if viewing own profile
   const isOwnProfile = currentUser?.id === id;
+  // Check if the current user is an admin
+  const isAdmin = currentUser?.isAdmin || false;
 
   const { data, loading, error, refetch } = useQuery(GET_USER_PROFILE, {
     variables: { id },
@@ -71,6 +89,8 @@ export function UserProfilePage() {
   });
 
   const [updateUser] = useMutation(UPDATE_USER);
+  const [deleteUser] = useMutation(DELETE_USER);
+  const [deleteChannel] = useMutation(DELETE_CHANNEL);
 
   const handleAvatarUpdate = async (avatarUrl: string) => {
     try {
@@ -86,6 +106,71 @@ export function UserProfilePage() {
       notifications.show({
         title: 'Error',
         message: error instanceof Error ? error.message : 'Failed to update avatar',
+        color: 'red',
+      });
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      await deleteUser({
+        variables: {
+          id,
+        },
+      });
+
+      notifications.show({
+        title: 'Success',
+        message: 'User deleted successfully',
+        color: 'green',
+      });
+
+      // Navigate back to home
+      navigate('/home');
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: error instanceof Error ? error.message : 'Failed to delete user',
+        color: 'red',
+      });
+    }
+  };
+
+  const handleOpenDeleteChannelModal = (channelId: string) => {
+    setChannelToDelete(channelId);
+    setDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setChannelToDelete(null);
+  };
+
+  const handleDeleteChannel = async () => {
+    if (!channelToDelete) {
+      return;
+    }
+
+    try {
+      await deleteChannel({
+        variables: {
+          id: channelToDelete,
+        },
+      });
+
+      notifications.show({
+        title: 'Success',
+        message: 'Channel deleted successfully',
+        color: 'green',
+      });
+
+      // Refetch the user data to update the UI
+      await refetch();
+      handleCloseDeleteModal();
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: error instanceof Error ? error.message : 'Failed to delete channel',
         color: 'red',
       });
     }
@@ -136,6 +221,8 @@ export function UserProfilePage() {
           withButton={false}
           canEditAvatar={isOwnProfile}
           onAvatarUpdate={isOwnProfile ? handleAvatarUpdate : undefined}
+          showAdminControls={isAdmin && !isOwnProfile}
+          onDeleteUser={isAdmin && !isOwnProfile && !user.isAdmin ? handleDeleteUser : undefined}
         />
 
         <Tabs defaultValue="channels" style={{ marginTop: '20px' }}>
@@ -158,6 +245,10 @@ export function UserProfilePage() {
                     description={channel.description}
                     createdAt={channel.createdAt}
                     compact
+                    showAdminControls={isAdmin}
+                    onDeleteChannel={
+                      isAdmin ? () => handleOpenDeleteChannelModal(channel.id) : undefined
+                    }
                   />
                 ))}
               </Stack>
@@ -243,6 +334,26 @@ export function UserProfilePage() {
             )}
           </Tabs.Panel>
         </Tabs>
+
+        {/* Delete Channel Confirmation Modal */}
+        <Modal
+          opened={deleteModalOpen}
+          onClose={handleCloseDeleteModal}
+          title="Confirm Channel Deletion"
+          centered
+        >
+          <Text mb="md">
+            Are you sure you want to delete this channel? This action cannot be undone.
+          </Text>
+          <Group justify="flex-end">
+            <Button variant="subtle" onClick={handleCloseDeleteModal}>
+              Cancel
+            </Button>
+            <Button color="red" onClick={handleDeleteChannel}>
+              Delete Channel
+            </Button>
+          </Group>
+        </Modal>
       </Container>
     </AppShell>
   );

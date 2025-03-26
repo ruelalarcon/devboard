@@ -17,7 +17,8 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { AppShell } from '../components/AppShell';
 import { ChannelCard } from '../components/ChannelCard';
-import { CREATE_CHANNEL, GET_CHANNELS } from '../graphql/channel';
+import { useAuth } from '../contexts/AuthContext';
+import { CREATE_CHANNEL, DELETE_CHANNEL, GET_CHANNELS } from '../graphql/channel';
 
 interface Channel {
   id: string;
@@ -32,8 +33,14 @@ interface Channel {
 
 export function HomePage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [channelToDelete, setChannelToDelete] = useState<string | null>(null);
+  const { user } = useAuth();
+  const isAdmin = user?.isAdmin || false;
+
   const { loading, error, data, refetch } = useQuery(GET_CHANNELS);
   const [createChannel, { loading: createLoading }] = useMutation(CREATE_CHANNEL);
+  const [deleteChannel] = useMutation(DELETE_CHANNEL);
 
   const form = useForm({
     initialValues: {
@@ -70,6 +77,46 @@ export function HomePage() {
     }
   };
 
+  const handleOpenDeleteModal = (channelId: string) => {
+    setChannelToDelete(channelId);
+    setDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setChannelToDelete(null);
+  };
+
+  const handleDeleteChannel = async () => {
+    if (!channelToDelete) {
+      return;
+    }
+
+    try {
+      await deleteChannel({
+        variables: {
+          id: channelToDelete,
+        },
+      });
+
+      notifications.show({
+        title: 'Success',
+        message: 'Channel deleted successfully',
+        color: 'green',
+      });
+
+      // Refetch channels to update the UI
+      await refetch();
+      handleCloseDeleteModal();
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: error instanceof Error ? error.message : 'Failed to delete channel',
+        color: 'red',
+      });
+    }
+  };
+
   return (
     <AppShell>
       <Container>
@@ -100,6 +147,8 @@ export function HomePage() {
                   description={channel.description}
                   createdAt={channel.createdAt}
                   creator={channel.creator}
+                  showAdminControls={isAdmin}
+                  onDeleteChannel={isAdmin ? () => handleOpenDeleteModal(channel.id) : undefined}
                 />
               ))
             )}
@@ -133,6 +182,25 @@ export function HomePage() {
               </Button>
             </Group>
           </form>
+        </Modal>
+
+        <Modal
+          opened={deleteModalOpen}
+          onClose={handleCloseDeleteModal}
+          title="Confirm Channel Deletion"
+          centered
+        >
+          <Text mb="md">
+            Are you sure you want to delete this channel? This action cannot be undone.
+          </Text>
+          <Group justify="flex-end">
+            <Button variant="subtle" onClick={handleCloseDeleteModal}>
+              Cancel
+            </Button>
+            <Button color="red" onClick={handleDeleteChannel}>
+              Delete Channel
+            </Button>
+          </Group>
         </Modal>
       </Container>
     </AppShell>

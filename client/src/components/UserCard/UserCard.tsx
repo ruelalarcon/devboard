@@ -15,6 +15,8 @@ interface UserCardProps {
   withButton?: boolean;
   canEditAvatar?: boolean;
   onAvatarUpdate?: (avatarUrl: string) => Promise<void>;
+  showAdminControls?: boolean;
+  onDeleteUser?: () => void;
 }
 
 export function UserCard({
@@ -28,6 +30,8 @@ export function UserCard({
   withButton = true,
   canEditAvatar = false,
   onAvatarUpdate,
+  showAdminControls = false,
+  onDeleteUser,
 }: UserCardProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -90,6 +94,11 @@ export function UserCard({
               size={compact ? 'xs' : 'sm'}
             >
               View Profile
+            </Button>
+          )}
+          {showAdminControls && onDeleteUser && !isAdmin && (
+            <Button color="red" size={compact ? 'xs' : 'sm'} onClick={onDeleteUser}>
+              Delete User
             </Button>
           )}
         </Group>

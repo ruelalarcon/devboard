@@ -15,6 +15,8 @@ interface ChannelCardProps {
   compact?: boolean;
   withLink?: boolean;
   children?: ReactNode;
+  showAdminControls?: boolean;
+  onDeleteChannel?: () => void;
 }
 
 export function ChannelCard({
@@ -26,6 +28,8 @@ export function ChannelCard({
   compact = false,
   withLink = true,
   children,
+  showAdminControls = false,
+  onDeleteChannel,
 }: ChannelCardProps) {
   const nameElement = withLink ? (
     <Link to={`/channel/${id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -60,17 +64,24 @@ export function ChannelCard({
             </Text>
           )}
         </div>
-        {withLink && !children && (
-          <Button
-            component={Link}
-            to={`/channel/${id}`}
-            variant="outline"
-            size={compact ? 'xs' : 'sm'}
-          >
-            View Channel
-          </Button>
-        )}
-        {children}
+        <Group>
+          {withLink && !children && (
+            <Button
+              component={Link}
+              to={`/channel/${id}`}
+              variant="outline"
+              size={compact ? 'xs' : 'sm'}
+            >
+              View Channel
+            </Button>
+          )}
+          {showAdminControls && onDeleteChannel && (
+            <Button color="red" size={compact ? 'xs' : 'sm'} onClick={onDeleteChannel}>
+              Delete Channel
+            </Button>
+          )}
+          {children}
+        </Group>
       </Group>
     </Card>
   );
