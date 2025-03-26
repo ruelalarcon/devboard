@@ -89,7 +89,7 @@ export function HomePage() {
           <Stack>
             {data.channels.length === 0 ? (
               <Text c="dimmed" ta="center">
-                No channels yet. Create your first channel!
+                No channels yet. Create the first channel!
               </Text>
             ) : (
               data.channels.map((channel: Channel) => (
