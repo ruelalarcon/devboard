@@ -28,6 +28,7 @@ interface Message {
   author: {
     id: string;
     displayName: string;
+    username: string;
     avatar?: string;
   };
   positiveRatings: number;

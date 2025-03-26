@@ -23,11 +23,11 @@ export function useContent({ contentId, contentType: _contentType, onSuccess }: 
       return null;
     }
 
-    // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Check file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
       notifications.show({
         title: 'Error',
-        message: 'File size must be less than 5MB',
+        message: 'File size must be less than 50MB',
         color: 'red',
       });
       return null;

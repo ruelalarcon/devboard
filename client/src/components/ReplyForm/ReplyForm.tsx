@@ -43,10 +43,10 @@ export function ReplyForm({
     }
 
     // Check file size (max 5MB)
-    if (selectedFile.size > 5 * 1024 * 1024) {
+    if (selectedFile.size > 50 * 1024 * 1024) {
       notifications.show({
         title: 'Error',
-        message: 'File size must be less than 5MB',
+        message: 'File size must be less than 50MB',
         color: 'red',
       });
       return;
