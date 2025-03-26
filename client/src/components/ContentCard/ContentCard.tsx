@@ -1,9 +1,9 @@
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { CodeHighlight } from '@mantine/code-highlight';
-import { Avatar, Box, Divider, Group, Paper, Text } from '@mantine/core';
+import { Avatar, Blockquote, Box, Divider, Group, List, Paper, Text, Title } from '@mantine/core';
 import { uploadConfig } from '../../config/upload';
-import { parseContent } from '../../utils/contentUtils';
+import { formatInlineMarkdown, parseContent } from '../../utils/contentUtils';
 import { formatDateTime } from '../../utils/dateUtils';
 import { DeleteButton } from '../DeleteButton/DeleteButton';
 import { RatingButtons } from '../RatingButtons';
@@ -71,14 +71,14 @@ export function ContentCard({
       <Box my="md">
         {contentBlocks.map((block, index) => (
           <Box key={index} mb={block.type === 'code' ? 'md' : 'xs'}>
-            {block.type === 'text' ? (
+            {block.type === 'text' && (
               <Text
                 size={variant === 'primary' ? 'lg' : 'md'}
                 style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
-              >
-                {block.content}
-              </Text>
-            ) : (
+                dangerouslySetInnerHTML={{ __html: formatInlineMarkdown(block.content) }}
+              />
+            )}
+            {block.type === 'code' && (
               <CodeHighlight
                 code={block.content}
                 language={block.language}
@@ -88,8 +88,43 @@ export function ContentCard({
                   root: {
                     borderRadius: '0.25rem',
                   },
+                  code: {
+                    fontSize: '.85rem',
+                  },
+                  pre: {
+                    fontSize: '.85rem',
+                  },
                 }}
               />
+            )}
+            {block.type === 'blockquote' && (
+              <Blockquote
+                color="blue"
+                iconSize={20}
+                radius="md"
+                style={{
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  paddingInline: '10px',
+                  paddingBlock: '5px',
+                }}
+              >
+                <div dangerouslySetInnerHTML={{ __html: formatInlineMarkdown(block.content) }} />
+              </Blockquote>
+            )}
+            {block.type === 'header' && block.level && (
+              <Title order={block.level as 1 | 2 | 3 | 4 | 5 | 6}>
+                <div dangerouslySetInnerHTML={{ __html: formatInlineMarkdown(block.content) }} />
+              </Title>
+            )}
+            {block.type === 'list' && block.items && (
+              <List spacing="xs" size={variant === 'primary' ? 'md' : 'sm'} withPadding>
+                {block.items.map((item, itemIndex) => (
+                  <List.Item key={itemIndex}>
+                    <div dangerouslySetInnerHTML={{ __html: formatInlineMarkdown(item) }} />
+                  </List.Item>
+                ))}
+              </List>
             )}
           </Box>
         ))}
