@@ -8,6 +8,7 @@ export const GET_USER_PROFILE = gql`
       displayName
       avatar
       isAdmin
+      createdAt
       channels {
         id
         name
