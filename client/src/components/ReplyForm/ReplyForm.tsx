@@ -81,7 +81,14 @@ export function ReplyForm({
 
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
-      <Textarea placeholder={placeholder} minRows={2} mb="sm" {...form.getInputProps('content')} />
+      <Textarea
+        placeholder={placeholder}
+        minRows={2}
+        maxRows={20}
+        autosize
+        mb="sm"
+        {...form.getInputProps('content')}
+      />
 
       {preview && (
         <Box mb="sm">

@@ -1,6 +1,8 @@
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { CodeHighlight } from '@mantine/code-highlight';
 import { Avatar, Box, Divider, Group, Paper, Text } from '@mantine/core';
+import { parseContent } from '../../utils/contentUtils';
 import { formatDateTime } from '../../utils/dateUtils';
 import { DeleteButton } from '../DeleteButton/DeleteButton';
 import { RatingButtons } from '../RatingButtons';
@@ -39,6 +41,8 @@ export function ContentCard({
   children,
   variant = 'primary',
 }: ContentCardProps) {
+  const contentBlocks = parseContent(content);
+
   return (
     <Paper withBorder p="md" radius="md" mb="xs">
       <Group gap="sm" mb="xs">
@@ -60,9 +64,22 @@ export function ContentCard({
         </div>
       </Group>
 
-      <Text size={variant === 'primary' ? 'lg' : 'md'} my="md">
-        {content}
-      </Text>
+      <Box my="md">
+        {contentBlocks.map((block, index) => (
+          <Box key={index} mb={block.type === 'code' ? 'md' : 'xs'}>
+            {block.type === 'text' ? (
+              <Text size={variant === 'primary' ? 'lg' : 'md'}>{block.content}</Text>
+            ) : (
+              <CodeHighlight
+                code={block.content}
+                language={block.language}
+                withCopyButton
+                my="xs"
+              />
+            )}
+          </Box>
+        ))}
+      </Box>
 
       {screenshot && (
         <Box my="md">

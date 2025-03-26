@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.5",
+    "@mantine/code-highlight": "^7.17.2",
     "@mantine/core": "7.17.2",
     "@mantine/form": "^7.17.2",
     "@mantine/hooks": "7.17.2",
