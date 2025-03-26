@@ -42,7 +42,7 @@ module.exports = {
       const channel = await db.Channel.create({
         name,
         description: sanitizedDescription,
-        userId: req.session.userId,
+        createdBy: req.session.userId,
       });
 
       return channel;
@@ -62,7 +62,7 @@ module.exports = {
 
       // Authorization check (admin or creator)
       const user = await db.User.findByPk(req.session.userId);
-      if (!user.isAdmin && channel.userId !== user.id) {
+      if (!user.isAdmin && channel.createdBy !== user.id) {
         throw createError("Not authorized", "FORBIDDEN");
       }
 
