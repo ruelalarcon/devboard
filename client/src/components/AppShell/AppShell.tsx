@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
+  Avatar,
   Box,
   Burger,
   Button,
@@ -40,12 +41,17 @@ function Header({
       </Group>
       {user && (
         <Group>
-          <Text>
-            Hello,{' '}
-            <Link to={`/user/${user.id}`} style={{ textDecoration: 'none' }}>
-              {user.displayName}
-            </Link>
-          </Text>
+          <Group>
+            <Avatar src={user.avatar} size="sm" radius="xl">
+              {user.displayName[0]}
+            </Avatar>
+            <Text>
+              Hello,{' '}
+              <Link to={`/user/${user.id}`} style={{ textDecoration: 'none' }}>
+                {user.displayName}
+              </Link>
+            </Text>
+          </Group>
           <Button onClick={onLogout} variant="outline" color="red" size="sm">
             Logout
           </Button>

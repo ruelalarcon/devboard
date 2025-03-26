@@ -51,7 +51,7 @@ export function ContentCard({
     <Paper withBorder p="md" radius="md" mb="xs">
       <Group gap="sm" mb="xs">
         <Link to={`/user/${author.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-          <Avatar color={variant === 'primary' ? 'blue' : 'cyan'} radius="xl">
+          <Avatar src={author.avatar} color={variant === 'primary' ? 'blue' : 'cyan'} radius="xl">
             {author.displayName[0]}
           </Avatar>
         </Link>
