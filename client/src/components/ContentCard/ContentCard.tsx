@@ -80,6 +80,11 @@ export function ContentCard({
                 language={block.language}
                 withCopyButton
                 my="xs"
+                styles={{
+                  root: {
+                    borderRadius: '0.25rem',
+                  },
+                }}
               />
             )}
           </Box>
@@ -88,7 +93,11 @@ export function ContentCard({
 
       {screenshot && (
         <Box my="md">
-          <img src={screenshot} alt="Screenshot" style={{ maxWidth: '100%', maxHeight: '300px' }} />
+          <img
+            src={screenshot}
+            alt="Screenshot"
+            style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '0.25rem' }}
+          />
         </Box>
       )}
 
