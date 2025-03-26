@@ -44,11 +44,6 @@ module.exports = {
         );
       }
 
-      // Check if user is trying to rate their own content
-      if (content.userId === req.session.userId) {
-        throw createError("You cannot rate your own content", "FORBIDDEN");
-      }
-
       // Check if rating already exists
       let rating = await db.Rating.findOne({
         where: {
