@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
+  Box,
   Burger,
   Button,
   Group,
@@ -8,7 +9,6 @@ import {
   NavLink,
   Text,
   Title,
-  Box,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useAuth } from '../../contexts/AuthContext';
@@ -33,7 +33,9 @@ function Header({
       <Group>
         <Burger opened={opened} onClick={onToggle} hiddenFrom="sm" size="sm" />
         <Box visibleFrom="sm">
-          <Title order={3}>Programming Channel</Title>
+          <Link to="/dashboard" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Title order={3}>Programming Channel</Title>
+          </Link>
         </Box>
       </Group>
       {user && (

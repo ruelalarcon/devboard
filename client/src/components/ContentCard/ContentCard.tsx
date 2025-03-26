@@ -68,7 +68,12 @@ export function ContentCard({
         {contentBlocks.map((block, index) => (
           <Box key={index} mb={block.type === 'code' ? 'md' : 'xs'}>
             {block.type === 'text' ? (
-              <Text size={variant === 'primary' ? 'lg' : 'md'}>{block.content}</Text>
+              <Text
+                size={variant === 'primary' ? 'lg' : 'md'}
+                style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+              >
+                {block.content}
+              </Text>
             ) : (
               <CodeHighlight
                 code={block.content}
