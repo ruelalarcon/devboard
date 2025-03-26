@@ -215,16 +215,19 @@ module.exports = {
     channels: async (user, _, { db }) => {
       return await db.Channel.findAll({
         where: { createdBy: user.id },
+        order: [["createdAt", "DESC"]],
       });
     },
     messages: async (user, _, { db }) => {
       return await db.Message.findAll({
         where: { userId: user.id },
+        order: [["createdAt", "DESC"]],
       });
     },
     replies: async (user, _, { db }) => {
       return await db.Reply.findAll({
         where: { userId: user.id },
+        order: [["createdAt", "DESC"]],
       });
     },
     ratings: async (user, _, { db }) => {
