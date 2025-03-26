@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { CodeHighlight } from '@mantine/code-highlight';
 import { Avatar, Box, Divider, Group, Paper, Text } from '@mantine/core';
+import { uploadConfig } from '../../config/upload';
 import { parseContent } from '../../utils/contentUtils';
 import { formatDateTime } from '../../utils/dateUtils';
 import { DeleteButton } from '../DeleteButton/DeleteButton';
@@ -42,6 +43,9 @@ export function ContentCard({
   variant = 'primary',
 }: ContentCardProps) {
   const contentBlocks = parseContent(content);
+
+  // Ensure the screenshot URL is a full URL
+  const fullScreenshotUrl = screenshot && uploadConfig.getFullUrl(screenshot);
 
   return (
     <Paper withBorder p="md" radius="md" mb="xs">
@@ -91,10 +95,10 @@ export function ContentCard({
         ))}
       </Box>
 
-      {screenshot && (
+      {fullScreenshotUrl && (
         <Box my="md">
           <img
-            src={screenshot}
+            src={fullScreenshotUrl}
             alt="Screenshot"
             style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '0.25rem' }}
           />

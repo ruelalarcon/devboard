@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { notifications } from '@mantine/notifications';
+import { uploadConfig } from '../config/upload';
 import { CREATE_MESSAGE, CREATE_REPLY, DELETE_MESSAGE, DELETE_REPLY } from '../graphql/message';
 
 type ContentType = 'message' | 'channel' | 'reply';
@@ -23,19 +24,18 @@ export function useContent({ contentId, contentType: _contentType, onSuccess }: 
       return null;
     }
 
-    // Check file size (max 50MB)
-    if (file.size > 50 * 1024 * 1024) {
+    // Check file size
+    if (file.size > uploadConfig.maxFileSize) {
       notifications.show({
         title: 'Error',
-        message: 'File size must be less than 50MB',
+        message: `File size must be less than ${uploadConfig.formatFileSize(uploadConfig.maxFileSize)}`,
         color: 'red',
       });
       return null;
     }
 
     // Check file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
-    if (!allowedTypes.includes(file.type)) {
+    if (!uploadConfig.allowedFileTypes.mimeTypes.includes(file.type)) {
       notifications.show({
         title: 'Error',
         message: 'Only image files (JPEG, PNG, GIF, WEBP) are allowed',
@@ -49,7 +49,7 @@ export function useContent({ contentId, contentType: _contentType, onSuccess }: 
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await fetch('http://localhost:4000/api/upload', {
+      const response = await fetch(uploadConfig.uploadEndpoint, {
         method: 'POST',
         body: formData,
       });
@@ -60,10 +60,8 @@ export function useContent({ contentId, contentType: _contentType, onSuccess }: 
         throw new Error(data.message || 'Failed to upload image');
       }
 
-      const serverUrl = 'http://localhost:4000';
-      const imageUrl = `${serverUrl}${data.file.url}`;
-
-      return imageUrl;
+      // Convert the relative path to a full URL
+      return uploadConfig.getFullUrl(data.file.url);
     } catch (error) {
       notifications.show({
         title: 'Error',

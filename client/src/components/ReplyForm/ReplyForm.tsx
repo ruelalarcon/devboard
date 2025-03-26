@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Box, Button, FileButton, Group, Image, Text, Textarea } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
+import { uploadConfig } from '../../config/upload';
 
 interface ReplyFormProps {
   onSubmit: (content: string, file: File | null) => Promise<void>;
@@ -42,19 +43,18 @@ export function ReplyForm({
       return;
     }
 
-    // Check file size (max 5MB)
-    if (selectedFile.size > 50 * 1024 * 1024) {
+    // Check file size
+    if (selectedFile.size > uploadConfig.maxFileSize) {
       notifications.show({
         title: 'Error',
-        message: 'File size must be less than 50MB',
+        message: `File size must be less than ${uploadConfig.formatFileSize(uploadConfig.maxFileSize)}`,
         color: 'red',
       });
       return;
     }
 
     // Check file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
-    if (!allowedTypes.includes(selectedFile.type)) {
+    if (!uploadConfig.allowedFileTypes.mimeTypes.includes(selectedFile.type)) {
       notifications.show({
         title: 'Error',
         message: 'Only image files (JPEG, PNG, GIF, WEBP) are allowed',
@@ -107,7 +107,7 @@ export function ReplyForm({
         )}
         <FileButton
           onChange={handleFileChange}
-          accept="image/png,image/jpeg,image/gif,image/webp"
+          accept={uploadConfig.allowedFileTypes.mimeTypes.join(',')}
           resetRef={resetRef}
         >
           {(props) => (
@@ -123,7 +123,7 @@ export function ReplyForm({
 
       {file && (
         <Text size="xs" ta="right" mt="xs" c="dimmed">
-          {file.name} ({Math.round(file.size / 1024)}KB)
+          {file.name} ({uploadConfig.formatFileSize(file.size)})
         </Text>
       )}
     </form>

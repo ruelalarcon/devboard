@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, FileButton, Group, Image, Loader, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
+import { uploadConfig } from '../../config/upload';
 
 interface ImageUploadProps {
   onImageUploaded: (imageUrl: string) => void;
@@ -17,18 +18,17 @@ export function ImageUpload({ onImageUploaded }: ImageUploadProps) {
     }
 
     // Check file size
-    if (selectedFile.size > 50 * 1024 * 1024) {
+    if (selectedFile.size > uploadConfig.maxFileSize) {
       notifications.show({
         title: 'Error',
-        message: 'File size must be less than 50MB',
+        message: `File size must be less than ${uploadConfig.formatFileSize(uploadConfig.maxFileSize)}`,
         color: 'red',
       });
       return;
     }
 
     // Check file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
-    if (!allowedTypes.includes(selectedFile.type)) {
+    if (!uploadConfig.allowedFileTypes.mimeTypes.includes(selectedFile.type)) {
       notifications.show({
         title: 'Error',
         message: 'Only image files (JPEG, PNG, GIF, WEBP) are allowed',
@@ -57,11 +57,9 @@ export function ImageUpload({ onImageUploaded }: ImageUploadProps) {
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await fetch('http://localhost:4000/api/upload', {
+      const response = await fetch(uploadConfig.uploadEndpoint, {
         method: 'POST',
         body: formData,
-        // No need to set Content-Type header with FormData
-        // browser will set it automatically with the correct boundary
       });
 
       const data = await response.json();
@@ -70,8 +68,8 @@ export function ImageUpload({ onImageUploaded }: ImageUploadProps) {
         throw new Error(data.message || 'Failed to upload image');
       }
 
-      const serverUrl = 'http://localhost:4000'; // Use environment variable in production
-      const imageUrl = `${serverUrl}${data.file.url}`;
+      // Convert the relative path to a full URL
+      const imageUrl = uploadConfig.getFullUrl(data.file.url);
 
       onImageUploaded(imageUrl);
       notifications.show({
@@ -105,7 +103,7 @@ export function ImageUpload({ onImageUploaded }: ImageUploadProps) {
         {!preview ? (
           <FileButton
             onChange={handleFileChange}
-            accept="image/png,image/jpeg,image/gif,image/webp"
+            accept={uploadConfig.allowedFileTypes.mimeTypes.join(',')}
           >
             {(props) => <Button {...props}>Select Image</Button>}
           </FileButton>
@@ -131,7 +129,7 @@ export function ImageUpload({ onImageUploaded }: ImageUploadProps) {
       </Group>
       {file && (
         <Text size="sm" ta="center" mt="sm">
-          {file.name} ({Math.round(file.size / 1024)}KB)
+          {file.name} ({uploadConfig.formatFileSize(file.size)})
         </Text>
       )}
       {loading && <Loader size="sm" mx="auto" mt="sm" />}
