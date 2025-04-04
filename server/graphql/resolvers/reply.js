@@ -28,11 +28,7 @@ module.exports = {
   },
 
   Mutation: {
-    createReply: async (
-      _,
-      { messageId, content, screenshot, parentReplyId },
-      { db, req }
-    ) => {
+    createReply: async (_, { messageId, content, screenshot, parentReplyId }, { db, req }) => {
       // Authentication check
       if (!req.session.userId) {
         throw createError("You must be logged in", "UNAUTHENTICATED");
@@ -164,10 +160,7 @@ module.exports = {
         // Rollback the transaction in case of error
         await transaction.rollback();
         console.error("Error during reply deletion:", error);
-        throw createError(
-          `Failed to delete reply: ${error.message}`,
-          "INTERNAL_SERVER_ERROR"
-        );
+        throw createError(`Failed to delete reply: ${error.message}`, "INTERNAL_SERVER_ERROR");
       }
     },
   },

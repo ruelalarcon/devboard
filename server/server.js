@@ -3,9 +3,7 @@ const express = require("express");
 const http = require("http");
 const { ApolloServer } = require("@apollo/server");
 const { expressMiddleware } = require("@apollo/server/express4");
-const {
-  ApolloServerPluginDrainHttpServer,
-} = require("@apollo/server/plugin/drainHttpServer");
+const { ApolloServerPluginDrainHttpServer } = require("@apollo/server/plugin/drainHttpServer");
 const {
   ApolloServerPluginLandingPageLocalDefault,
 } = require("@apollo/server/plugin/landingPage/default");
@@ -115,7 +113,11 @@ async function startServer() {
   // Add route to serve the React app
   app.get("*", (req, res, next) => {
     // Skip API and GraphQL requests
-    if (req.path.startsWith("/api") || req.path.startsWith("/graphql") || req.path.startsWith("/uploads")) {
+    if (
+      req.path.startsWith("/api") ||
+      req.path.startsWith("/graphql") ||
+      req.path.startsWith("/uploads")
+    ) {
       return next();
     }
     // Serve the React app

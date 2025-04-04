@@ -4,13 +4,7 @@ module.exports = {
 
   // Allowed file types
   allowedFileTypes: {
-    mimeTypes: [
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-      "image/webp",
-      "image/jpg",
-    ],
+    mimeTypes: ["image/jpeg", "image/png", "image/gif", "image/webp", "image/jpg"],
     extensions: [".jpeg", ".jpg", ".png", ".gif", ".webp"],
   },
 

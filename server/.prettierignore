@@ -1,0 +1,25 @@
+# Dependencies
+node_modules
+package-lock.json
+
+# Build output
+dist
+build
+public
+
+# Environment
+.env
+.env.*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Uploads
+uploads
+temp_uploads
+
+# OS specific
+.DS_Store
+.thumbs.db 

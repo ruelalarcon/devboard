@@ -16,7 +16,7 @@ function sanitizeContent(content) {
   const blockquoteRegex = /^>\s+(.+)$/gm;
 
   // Replace Markdown blockquotes with HTML blockquotes
-  processedContent = processedContent.replace(blockquoteRegex, '<blockquote>$1</blockquote>');
+  processedContent = processedContent.replace(blockquoteRegex, "<blockquote>$1</blockquote>");
 
   // Then sanitize the HTML
   return sanitizeHtml(processedContent, {
@@ -61,10 +61,7 @@ function sanitizeContent(content) {
             target: "_blank",
             rel: "noopener noreferrer",
             // Only allow http, https, and ftp protocols
-            href:
-              attribs.href && /^(https?|ftp):\/\//i.test(attribs.href)
-                ? attribs.href
-                : "#",
+            href: attribs.href && /^(https?|ftp):\/\//i.test(attribs.href) ? attribs.href : "#",
           },
         };
       },

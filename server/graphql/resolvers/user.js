@@ -34,15 +34,11 @@ module.exports = {
           attributes: [
             "id",
             [
-              sequelize.literal(
-                "(SELECT COUNT(*) FROM Messages WHERE Messages.userId = User.id)"
-              ),
+              sequelize.literal("(SELECT COUNT(*) FROM Messages WHERE Messages.userId = User.id)"),
               "messageCount",
             ],
             [
-              sequelize.literal(
-                "(SELECT COUNT(*) FROM Replies WHERE Replies.userId = User.id)"
-              ),
+              sequelize.literal("(SELECT COUNT(*) FROM Replies WHERE Replies.userId = User.id)"),
               "replyCount",
             ],
           ],
@@ -87,9 +83,7 @@ module.exports = {
               "negativeRatings",
             ],
           ],
-          order: [
-            [sequelize.literal("positiveRatings - negativeRatings"), "DESC"],
-          ],
+          order: [[sequelize.literal("positiveRatings - negativeRatings"), "DESC"]],
         });
 
         // Get full user objects
@@ -105,11 +99,7 @@ module.exports = {
   },
 
   Mutation: {
-    register: async (
-      _,
-      { username, password, displayName, avatar },
-      { db, req }
-    ) => {
+    register: async (_, { username, password, displayName, avatar }, { db, req }) => {
       // Check if username already exists
       const existingUser = await db.User.findOne({ where: { username } });
       if (existingUser) {
@@ -283,10 +273,7 @@ module.exports = {
         // Rollback the transaction in case of error
         await transaction.rollback();
         console.error("Error during user deletion:", error);
-        throw createError(
-          `Failed to delete user: ${error.message}`,
-          "INTERNAL_SERVER_ERROR"
-        );
+        throw createError(`Failed to delete user: ${error.message}`, "INTERNAL_SERVER_ERROR");
       }
     },
   },

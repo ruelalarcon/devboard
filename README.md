@@ -1,6 +1,22 @@
-# Unified Application (Port 3000)
+# Programming Channel Application
 
-This project now runs both the frontend and backend on the same port (3000).
+This project runs both the frontend and backend on the same port (3000).
+
+## Features
+
+- User accounts and authentication using express-session
+- Channel management for organizing programming topics
+- Message and nested replies system for Q&A
+- Rating system (upvotes/downvotes) for content
+- Admin account with special privileges
+- Search functionality for content
+- GraphQL API with built-in GraphQL Explorer
+
+## Tech Stack
+
+- Backend: Node.js, Express.js, GraphQL (Apollo Server v4), MySQL (with Sequelize ORM)
+- Frontend: React, Mantine UI, Apollo Client
+- Authentication: Express-session
 
 ## Setup
 
@@ -10,7 +26,25 @@ This project now runs both the frontend and backend on the same port (3000).
 npm install
 ```
 
-2. Build the client application:
+2. Create a `.env` file in the server directory with the following variables:
+
+```
+DB_HOST=localhost
+DB_USER=your_mysql_username
+DB_PASSWORD=your_mysql_password
+DB_NAME=programming_channel_db
+PORT=3000
+SESSION_SECRET=your_session_secret
+ADMIN_PASSWORD=your_admin_password
+```
+
+3. Create the MySQL database:
+
+```sql
+CREATE DATABASE programming_channel_db;
+```
+
+4. Build the client application:
 
 ```bash
 npm run build
@@ -34,6 +68,8 @@ npm run dev
 
 The application will be available at http://localhost:3000
 
+To access the GraphQL Explorer, navigate to http://localhost:3000/graphql
+
 ## Cross-Platform Compatibility
 
 This project uses cross-platform Node.js scripts for building and deployment, making it compatible with:
@@ -47,3 +83,48 @@ This project uses cross-platform Node.js scripts for building and deployment, ma
 - All API requests are handled with the "/api" prefix
 - GraphQL requests are handled at "/graphql"
 - Static files (uploads) are served from "/uploads"
+
+## API
+
+The GraphQL API provides endpoints for:
+
+- User authentication (register, login, logout)
+- Channels (create, update, delete, query)
+- Messages (create, update, delete, query)
+- Replies (create, update, delete, query)
+- Ratings (rate content, delete rating)
+- Search (search content, user statistics)
+
+## Authentication
+
+All mutations except for login and register require authentication.
+Authentication is handled via express-session.
+
+## Admin Account
+
+An admin account is automatically created on first server start with:
+
+- Username: `admin`
+- Password: (from .env file)
+
+Admins have the power to delete any messages, channels, and users.
+
+## Formatting Code
+
+To format all code in the project:
+
+```bash
+npm run format
+```
+
+To format only client code:
+
+```bash
+npm run format:client
+```
+
+To format only server code:
+
+```bash
+npm run format:server
+```

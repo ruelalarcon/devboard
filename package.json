@@ -8,6 +8,11 @@
     "postbuild:client": "node scripts/copy-build.js",
     "build": "npm run build:client",
     "start": "cd server && npm start",
-    "dev": "cd server && npm run dev"
+    "dev": "cd server && npm run dev",
+    "db:sync": "cd server && npm run db:sync",
+    "db:reset": "cd server && npm run db:reset",
+    "format:server": "cd server && npm run prettier:write",
+    "format:client": "cd client && npm run prettier:write",
+    "format": "npm run format:server && npm run format:client"
   }
 }

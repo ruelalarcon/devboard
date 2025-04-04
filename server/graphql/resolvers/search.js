@@ -105,9 +105,7 @@ module.exports = {
         const ratings = messageObj.ratings || [];
 
         const positiveRatingsCount = ratings.filter((r) => r.isPositive).length;
-        const negativeRatingsCount = ratings.filter(
-          (r) => !r.isPositive
-        ).length;
+        const negativeRatingsCount = ratings.filter((r) => !r.isPositive).length;
 
         messageObj.positiveRatings = positiveRatingsCount;
         messageObj.negativeRatings = negativeRatingsCount;
@@ -149,14 +147,7 @@ module.exports = {
       const users = await db.User.findAll({
         where: whereClause,
         order: [["createdAt", "DESC"]],
-        attributes: [
-          "id",
-          "username",
-          "displayName",
-          "avatar",
-          "createdAt",
-          "updatedAt",
-        ],
+        attributes: ["id", "username", "displayName", "avatar", "createdAt", "updatedAt"],
       });
 
       return users;

@@ -9,11 +9,7 @@ const createError = (message, code) => {
 
 module.exports = {
   Mutation: {
-    rateContent: async (
-      _,
-      { contentId, contentType, isPositive },
-      { db, req }
-    ) => {
+    rateContent: async (_, { contentId, contentType, isPositive }, { db, req }) => {
       // Authentication check
       if (!req.session.userId) {
         throw createError("You must be logged in", "UNAUTHENTICATED");
@@ -21,10 +17,7 @@ module.exports = {
 
       // Validate contentType
       if (!["message", "reply"].includes(contentType)) {
-        throw createError(
-          'Invalid content type. Must be "message" or "reply"',
-          "BAD_USER_INPUT"
-        );
+        throw createError('Invalid content type. Must be "message" or "reply"', "BAD_USER_INPUT");
       }
 
       // Check if content exists
@@ -37,9 +30,7 @@ module.exports = {
 
       if (!content) {
         throw createError(
-          `${
-            contentType.charAt(0).toUpperCase() + contentType.slice(1)
-          } not found`,
+          `${contentType.charAt(0).toUpperCase() + contentType.slice(1)} not found`,
           "NOT_FOUND"
         );
       }
@@ -78,10 +69,7 @@ module.exports = {
 
       // Validate contentType
       if (!["message", "reply"].includes(contentType)) {
-        throw createError(
-          'Invalid content type. Must be "message" or "reply"',
-          "BAD_USER_INPUT"
-        );
+        throw createError('Invalid content type. Must be "message" or "reply"', "BAD_USER_INPUT");
       }
 
       // Find rating

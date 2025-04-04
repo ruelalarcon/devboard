@@ -31,9 +31,7 @@ const storage = multer.diskStorage({
 
 // File filter to only allow images
 const fileFilter = (req, file, cb) => {
-  const mimetype = uploadConfig.allowedFileTypes.mimeTypes.includes(
-    file.mimetype
-  );
+  const mimetype = uploadConfig.allowedFileTypes.mimeTypes.includes(file.mimetype);
   const extname = uploadConfig.allowedFileTypes.extensions.includes(
     path.extname(file.originalname).toLowerCase()
   );
@@ -56,10 +54,7 @@ const upload = multer({
 // Function to generate hash from file content
 const generateFileHash = (filePath) => {
   const fileBuffer = fs.readFileSync(filePath);
-  return crypto
-    .createHash(uploadConfig.fileNaming.hashAlgorithm)
-    .update(fileBuffer)
-    .digest("hex");
+  return crypto.createHash(uploadConfig.fileNaming.hashAlgorithm).update(fileBuffer).digest("hex");
 };
 
 // Function to check if file with hash already exists

@@ -34,9 +34,7 @@ module.exports = {
       }
 
       // Sanitize description if provided
-      const sanitizedDescription = description
-        ? sanitizeContent(description)
-        : null;
+      const sanitizedDescription = description ? sanitizeContent(description) : null;
 
       // Create channel
       const channel = await db.Channel.create({
@@ -169,10 +167,7 @@ module.exports = {
         // Rollback the transaction in case of error
         await transaction.rollback();
         console.error("Error during channel deletion:", error);
-        throw createError(
-          `Failed to delete channel: ${error.message}`,
-          "INTERNAL_SERVER_ERROR"
-        );
+        throw createError(`Failed to delete channel: ${error.message}`, "INTERNAL_SERVER_ERROR");
       }
     },
   },

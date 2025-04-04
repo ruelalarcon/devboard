@@ -7,7 +7,9 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "db:sync": "node -e \"require('dotenv').config(); const db = require('./models'); db.sequelize.sync();\"",
-    "db:reset": "node -e \"require('dotenv').config(); const db = require('./models'); db.sequelize.sync({ force: true });\""
+    "db:reset": "node -e \"require('dotenv').config(); const db = require('./models'); db.sequelize.sync({ force: true });\"",
+    "prettier": "prettier --check \"**/*.{js,json,md}\"",
+    "prettier:write": "prettier --write \"**/*.{js,json,md}\""
   },
   "dependencies": {
     "@apollo/server": "^4.9.5",
@@ -24,6 +26,7 @@
     "sequelize": "^6.35.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "prettier": "^3.5.3"
   }
 }
