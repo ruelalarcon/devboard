@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log
+client/node_modules
+client/dist
+server/node_modules
+server/public
+server/temp_uploads
+server/uploads
+server/cypress/screenshots
+server/cypress/videos
+.git
+.gitignore
+.env
+.DS_Store
+*/npm-debug.log
+Dockerfile
+docker-compose.yml
