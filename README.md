@@ -20,13 +20,7 @@ This project runs both the frontend and backend on the same port (3000).
 
 ## Setup
 
-1. Install dependencies for both client and server:
-
-```bash
-npm install
-```
-
-2. Create a `.env` file in the `server/` directory with the following variables:
+1. Create a `.env` file in the `server/` directory with the following variables:
 
 ```
 DB_HOST=localhost
@@ -36,6 +30,16 @@ DB_NAME=programming_channel_db
 PORT=3000
 SESSION_SECRET=your_session_secret
 ADMIN_PASSWORD=your_admin_password
+```
+
+If you don't create one, default values are used. These default values are insecure but work fine for experimental purposes.
+
+> After creating the `.env`, you can simply run the project using `docker compose up`, or you can continue with the following steps for manual setup.
+
+2. Install dependencies for both client and server:
+
+```bash
+npm install
 ```
 
 3. Build the client application:
