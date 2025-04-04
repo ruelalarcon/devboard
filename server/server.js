@@ -29,7 +29,7 @@ const httpServer = http.createServer(app);
 
 // Configure CORS
 const corsOptions = {
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  origin: process.env.CLIENT_URL || "http://localhost:3000",
   credentials: true,
 };
 
@@ -58,6 +58,9 @@ app.use("/api", uploadRoutes);
 
 // Serve static files (for screenshots/images)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Serve static files from the React build (client)
+app.use(express.static(path.join(__dirname, "public")));
 
 // Create Apollo Server
 const server = new ApolloServer({
@@ -109,8 +112,18 @@ async function startServer() {
     console.log("Admin account created");
   }
 
+  // Add route to serve the React app
+  app.get("*", (req, res, next) => {
+    // Skip API and GraphQL requests
+    if (req.path.startsWith("/api") || req.path.startsWith("/graphql") || req.path.startsWith("/uploads")) {
+      return next();
+    }
+    // Serve the React app
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+  });
+
   // Start the server
-  const PORT = process.env.PORT || 4000;
+  const PORT = process.env.PORT || 3000;
   await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
   console.log(`Server running at http://localhost:${PORT}`);
   console.log(`GraphQL endpoint: http://localhost:${PORT}/graphql`);

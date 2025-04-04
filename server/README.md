@@ -37,7 +37,7 @@ DB_HOST=localhost
 DB_USER=your_mysql_username
 DB_PASSWORD=your_mysql_password
 DB_NAME=programming_channel_db
-PORT=4000
+PORT=3000
 SESSION_SECRET=your_session_secret
 ADMIN_PASSWORD=your_admin_password
 ```
@@ -56,7 +56,7 @@ npm run dev
 
 6. Access the GraphQL Explorer:
 
-Open your browser and navigate to `http://localhost:4000/graphql`
+Open your browser and navigate to `http://localhost:3000/graphql`
 
 ## API
 
@@ -78,4 +78,4 @@ Authentication is handled via express-session.
 
 An admin account is automatically created on first server start with:
 - Username: `admin`
-- Password: (from .env file) 
+- Password: (from .env file)

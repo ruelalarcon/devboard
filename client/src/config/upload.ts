@@ -9,11 +9,11 @@ export const uploadConfig = {
   },
 
   // Server configuration
-  serverUrl: import.meta.env.VITE_API_URL || 'http://localhost:4000',
+  serverUrl: '',
 
   // Get upload endpoint
   get uploadEndpoint() {
-    return `${this.serverUrl}/api/upload`;
+    return `/api/upload`;
   },
 
   // Get complete URL for a resource path
@@ -25,7 +25,7 @@ export const uploadConfig = {
 
     // Make sure path starts with /
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-    return `${this.serverUrl}${normalizedPath}`;
+    return `${normalizedPath}`;
   },
 
   // File size display format

@@ -9,4 +9,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './vitest.setup.mjs',
   },
+  build: {
+    outDir: 'dist',
+    chunkSizeWarningLimit: 1000000000,
+  },
 });

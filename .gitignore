@@ -1,6 +1,9 @@
-node_modules/
+# Environment
 .env
+
+# Logs
 *.log
 *.description
+
+# OS
 .DS_Store
-server/uploads/

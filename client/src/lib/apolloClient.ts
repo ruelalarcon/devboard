@@ -29,7 +29,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 });
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4000/graphql',
+  uri: '/graphql',
   credentials: 'include', // For cookies/sessions
 });
 

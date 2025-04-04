@@ -1,0 +1,13 @@
+{
+  "name": "project",
+  "version": "1.0.0",
+  "description": "Full-stack channel-based programming issues tool",
+  "scripts": {
+    "install": "cd client && npm install && cd ../server && npm install",
+    "build:client": "cd client && npm run build",
+    "postbuild:client": "node scripts/copy-build.js",
+    "build": "npm run build:client",
+    "start": "cd server && npm start",
+    "dev": "cd server && npm run dev"
+  }
+}
