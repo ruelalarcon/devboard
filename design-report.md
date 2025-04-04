@@ -10,8 +10,8 @@ DevBoard is a community platform for discussing programming issues, sharing know
 
 ```
 ┌───────────────┐     ┌───────────────┐     ┌───────────────┐
-│  React Client │────▶│  GraphQL API  │────▶│ MySQL Database│
-│   (Frontend)  │◀────│   (Backend)   │◀────│   (Storage)   │
+│  React Client │---->│  GraphQL API  │---->│ MySQL Database│
+│   (Frontend)  │<----│   (Backend)   │<----│   (Storage)   │
 └───────────────┘     └───────────────┘     └───────────────┘
 ```
 
