@@ -1,6 +1,7 @@
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/code-highlight/styles.css';
+import './resources/fonts.css';
 
 import { ApolloProvider } from '@apollo/client';
 import { MantineProvider } from '@mantine/core';
