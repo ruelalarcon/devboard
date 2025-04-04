@@ -77,17 +77,18 @@ export function Reply({
           onDelete={onDelete}
           variant="secondary"
         >
-          <Button variant="subtle" size="xs" onClick={handleReplyClick}>
+          <Button variant="subtle" size="xs" onClick={handleReplyClick} data-cy="reply-button">
             Reply
           </Button>
         </ContentCard>
 
         {showReplyForm && (
-          <Box className={classes.replyForm}>
+          <Box className={classes.replyForm} data-cy="nested-reply-form">
             <ReplyForm
               onSubmit={handleSubmitReply}
               onCancel={() => setShowReplyForm(false)}
               placeholder="Write your reply to this comment..."
+              data-cy="nested-reply-input"
             />
           </Box>
         )}

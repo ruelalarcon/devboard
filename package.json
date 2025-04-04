@@ -9,10 +9,17 @@
     "build": "npm run build:client",
     "start": "cd server && npm start",
     "dev": "cd server && npm run dev",
+    "db:setup": "cd server && npm run db:setup",
     "db:sync": "cd server && npm run db:sync",
     "db:reset": "cd server && npm run db:reset",
+    "db:test:setup": "cd server && npm run db:test:setup",
+    "db:test:reset": "cd server && npm run db:test:reset",
     "format:server": "cd server && npm run prettier:write",
     "format:client": "cd client && npm run prettier:write",
-    "format": "npm run format:server && npm run format:client"
+    "format": "npm run format:server && npm run format:client",
+    "test:units": "cd server && npm run test",
+    "test:e2e": "cd server && npm run cy:run",
+    "test": "npm run test:units && npm run test:e2e",
+    "cypress": "cd server && npm run cy:open"
   }
 }

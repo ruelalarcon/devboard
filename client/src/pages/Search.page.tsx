@@ -90,7 +90,11 @@ export function SearchPage() {
     const channels = channelsData?.searchChannels || [];
 
     if (channels.length === 0) {
-      return <Text c="dimmed">No channels found matching your search.</Text>;
+      return (
+        <Text c="dimmed" data-cy="no-results-message">
+          No channels found matching your search.
+        </Text>
+      );
     }
 
     return (
@@ -103,6 +107,7 @@ export function SearchPage() {
             description={channel.description}
             createdAt={channel.createdAt}
             creator={channel.creator}
+            data-cy="channel-item"
           />
         ))}
       </Stack>
@@ -117,7 +122,11 @@ export function SearchPage() {
     const messages = messagesData?.searchMessages || [];
 
     if (messages.length === 0) {
-      return <Text c="dimmed">No messages found matching your search.</Text>;
+      return (
+        <Text c="dimmed" data-cy="no-results-message">
+          No messages found matching your search.
+        </Text>
+      );
     }
 
     return (
@@ -139,8 +148,15 @@ export function SearchPage() {
               contentType="message"
               onRatingChange={async () => {}}
               onDelete={async () => {}}
+              data-cy="message-item"
             >
-              <Button component={Link} to={`/message/${message.id}`} variant="subtle" size="xs">
+              <Button
+                component={Link}
+                to={`/message/${message.id}`}
+                variant="subtle"
+                size="xs"
+                data-cy="view-replies-button"
+              >
                 View Replies
               </Button>
             </ContentCard>
@@ -158,7 +174,11 @@ export function SearchPage() {
     const users = usersData?.searchUsers || [];
 
     if (users.length === 0) {
-      return <Text c="dimmed">No users found matching your search.</Text>;
+      return (
+        <Text c="dimmed" data-cy="no-results-message">
+          No users found matching your search.
+        </Text>
+      );
     }
 
     return (
@@ -171,6 +191,7 @@ export function SearchPage() {
             username={user.username}
             avatar={user.avatar}
             createdAt={user.createdAt}
+            data-cy="user-item"
           />
         ))}
       </Stack>
@@ -192,7 +213,7 @@ export function SearchPage() {
 
     if (error) {
       return (
-        <Alert color="red" title="Error">
+        <Alert color="red" title="Error" data-cy="error-alert">
           {error.message}
         </Alert>
       );
@@ -219,7 +240,9 @@ export function SearchPage() {
   return (
     <AppShell>
       <Container>
-        <Title mb="xl">Search</Title>
+        <Title mb="xl" data-cy="search-title">
+          Search
+        </Title>
 
         <Paper withBorder p="md" mb="xl">
           <form onSubmit={form.onSubmit(handleSearch)}>
@@ -230,9 +253,10 @@ export function SearchPage() {
                 required
                 style={{ flex: 1 }}
                 rightSection={loading ? <Loader size="xs" /> : null}
+                data-cy="search-term-input"
                 {...form.getInputProps('searchTerm')}
               />
-              <Button type="submit" loading={loading}>
+              <Button type="submit" loading={loading} data-cy="search-button">
                 Search
               </Button>
             </Group>
@@ -241,15 +265,16 @@ export function SearchPage() {
 
             <Group align="flex-start">
               <Radio.Group
-                label="Search In"
+                label={<Text data-cy="search-type-label">Search In</Text>}
                 value={activeTab}
                 onChange={(value) => handleTabChange(value)}
                 name="searchType"
+                data-cy="search-type-group"
               >
                 <Group mt="xs">
-                  <Radio value="channels" label="Channels" />
-                  <Radio value="messages" label="Messages" />
-                  <Radio value="users" label="Users" />
+                  <Radio value="channels" label="Channels" data-cy="channels-option" />
+                  <Radio value="messages" label="Messages" data-cy="messages-option" />
+                  <Radio value="users" label="Users" data-cy="users-option" />
                 </Group>
               </Radio.Group>
 
@@ -263,13 +288,14 @@ export function SearchPage() {
                 value={sortBy}
                 onChange={(value) => setSortBy(value || 'recent')}
                 style={{ width: 200 }}
+                data-cy="sort-by-select"
               />
             </Group>
           </form>
         </Paper>
 
         {hasResults && (
-          <Title order={3} mb="md">
+          <Title order={3} mb="md" data-cy="search-results-title">
             Results
           </Title>
         )}

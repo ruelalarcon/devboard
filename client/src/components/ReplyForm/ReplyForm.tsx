@@ -80,20 +80,28 @@ export function ReplyForm({
   };
 
   return (
-    <form onSubmit={form.onSubmit(handleSubmit)}>
+    <form onSubmit={form.onSubmit(handleSubmit)} data-cy="message-form">
       <Textarea
         placeholder={placeholder}
         minRows={2}
         maxRows={20}
         autosize
         mb="sm"
+        data-cy="message-input"
         {...form.getInputProps('content')}
       />
 
       {preview && (
         <Box mb="sm">
           <Image src={preview} alt="Preview" height={150} fit="contain" radius="md" />
-          <Button variant="subtle" color="red" size="xs" onClick={clearFile} mt="xs">
+          <Button
+            variant="subtle"
+            color="red"
+            size="xs"
+            onClick={clearFile}
+            mt="xs"
+            data-cy="remove-image-button"
+          >
             Remove Image
           </Button>
         </Box>
@@ -101,7 +109,7 @@ export function ReplyForm({
 
       <Group justify="flex-end">
         {onCancel && (
-          <Button variant="subtle" size="xs" onClick={onCancel}>
+          <Button variant="subtle" size="xs" onClick={onCancel} data-cy="cancel-button">
             Cancel
           </Button>
         )}
@@ -111,14 +119,16 @@ export function ReplyForm({
           resetRef={resetRef}
         >
           {(props) => (
-            <Button variant="subtle" size="xs" {...props}>
+            <Button variant="subtle" size="xs" {...props} data-cy="add-image-button">
               {file ? 'Change Image' : 'Add Image'}
             </Button>
           )}
         </FileButton>
-        <Button type="submit" size="xs" loading={isLoading}>
-          Post
-        </Button>
+        <div data-cy="message-submit">
+          <Button type="submit" size="xs" loading={isLoading} data-cy="submit-button">
+            Post
+          </Button>
+        </div>
       </Group>
 
       {file && (

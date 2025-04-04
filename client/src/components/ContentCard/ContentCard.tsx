@@ -48,27 +48,33 @@ export function ContentCard({
   const fullScreenshotUrl = screenshot && uploadConfig.getFullUrl(screenshot);
 
   return (
-    <Paper withBorder p="md" radius="md" mb="xs">
+    <Paper withBorder p="md" radius="md" mb="xs" data-cy="message-item">
       <Group gap="sm" mb="xs">
-        <Link to={`/user/${author.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link
+          to={`/user/${author.id}`}
+          style={{ textDecoration: 'none', color: 'inherit' }}
+          data-cy="author-link"
+        >
           <Avatar src={author.avatar} color={variant === 'primary' ? 'blue' : 'cyan'} radius="xl">
             {author.displayName[0]}
           </Avatar>
         </Link>
         <div>
           <Link to={`/user/${author.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-            <Text fw={500}>{author.displayName}</Text>
-            <Text size="sm" c="dimmed">
+            <Text fw={500} data-cy="author-name">
+              {author.displayName}
+            </Text>
+            <Text size="sm" c="dimmed" data-cy="author-username">
               @{author.username}
             </Text>
           </Link>
-          <Text size="xs" c="dimmed">
+          <Text size="xs" c="dimmed" data-cy="message-timestamp">
             {formatDateTime(createdAt)}
           </Text>
         </div>
       </Group>
 
-      <Box my="md">
+      <Box my="md" data-cy="message-content">
         {contentBlocks.map((block, index) => (
           <Box key={index} mb={block.type === 'code' ? 'md' : 'xs'}>
             {block.type === 'text' && (
@@ -136,6 +142,7 @@ export function ContentCard({
             src={fullScreenshotUrl}
             alt="Screenshot"
             style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '0.25rem' }}
+            data-cy="message-screenshot"
           />
         </Box>
       )}
@@ -149,6 +156,7 @@ export function ContentCard({
           positiveCount={positiveRatings}
           negativeCount={negativeRatings}
           onRatingChange={onRatingChange}
+          data-cy="rating-buttons"
         />
         <Group>
           {onDelete && contentType !== 'channel' && (
@@ -157,6 +165,7 @@ export function ContentCard({
               authorId={author.id}
               onDelete={onDelete}
               size={variant === 'primary' ? 'sm' : 'xs'}
+              data-cy="delete-message-button"
             />
           )}
           {children}

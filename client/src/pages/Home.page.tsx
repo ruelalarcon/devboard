@@ -64,6 +64,7 @@ export function HomePage() {
         title: 'Success',
         message: 'Channel created successfully',
         color: 'green',
+        'data-cy': 'notification-success',
       });
       form.reset();
       setCreateModalOpen(false);
@@ -73,6 +74,7 @@ export function HomePage() {
         title: 'Error',
         message: error instanceof Error ? error.message : 'Failed to create channel',
         color: 'red',
+        'data-cy': 'notification-error',
       });
     }
   };
@@ -103,6 +105,7 @@ export function HomePage() {
         title: 'Success',
         message: 'Channel deleted successfully',
         color: 'green',
+        'data-cy': 'notification-success',
       });
 
       // Refetch channels to update the UI
@@ -113,6 +116,7 @@ export function HomePage() {
         title: 'Error',
         message: error instanceof Error ? error.message : 'Failed to delete channel',
         color: 'red',
+        'data-cy': 'notification-error',
       });
     }
   };
@@ -121,13 +125,15 @@ export function HomePage() {
     <AppShell>
       <Container>
         <Group justify="space-between" mb="xl">
-          <Title>Home</Title>
-          <Button onClick={() => setCreateModalOpen(true)}>Create Channel</Button>
+          <Title data-cy="home-title">Home</Title>
+          <Button onClick={() => setCreateModalOpen(true)} data-cy="create-channel-button">
+            Create Channel
+          </Button>
         </Group>
 
         {loading && <Loader />}
         {error && (
-          <Alert color="red" title="Error">
+          <Alert color="red" title="Error" data-cy="error-alert">
             {error.message}
           </Alert>
         )}
@@ -135,7 +141,7 @@ export function HomePage() {
         {data?.channels && (
           <Stack>
             {data.channels.length === 0 ? (
-              <Text c="dimmed" ta="center">
+              <Text c="dimmed" ta="center" data-cy="no-channels-message">
                 No channels yet. Create the first channel!
               </Text>
             ) : (
@@ -149,6 +155,7 @@ export function HomePage() {
                   creator={channel.creator}
                   showAdminControls={isAdmin}
                   onDeleteChannel={isAdmin ? () => handleOpenDeleteModal(channel.id) : undefined}
+                  data-cy="channel-item"
                 />
               ))
             )}
@@ -159,25 +166,32 @@ export function HomePage() {
           opened={createModalOpen}
           onClose={() => setCreateModalOpen(false)}
           title="Create New Channel"
+          data-cy="create-channel-modal"
         >
           <form onSubmit={form.onSubmit(handleSubmit)}>
             <TextInput
               label="Channel Name"
               placeholder="Enter channel name"
               required
+              data-cy="channel-name-input"
               {...form.getInputProps('name')}
             />
             <Textarea
               label="Description"
               placeholder="Enter channel description (optional)"
               mt="md"
+              data-cy="channel-description-input"
               {...form.getInputProps('description')}
             />
             <Group justify="flex-end" mt="xl">
-              <Button variant="outline" onClick={() => setCreateModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setCreateModalOpen(false)}
+                data-cy="cancel-button"
+              >
                 Cancel
               </Button>
-              <Button type="submit" loading={createLoading}>
+              <Button type="submit" loading={createLoading} data-cy="create-channel-submit">
                 Create
               </Button>
             </Group>
@@ -189,15 +203,20 @@ export function HomePage() {
           onClose={handleCloseDeleteModal}
           title="Confirm Channel Deletion"
           centered
+          data-cy="delete-channel-modal"
         >
           <Text mb="md">
             Are you sure you want to delete this channel? This action cannot be undone.
           </Text>
           <Group justify="flex-end">
-            <Button variant="subtle" onClick={handleCloseDeleteModal}>
+            <Button
+              variant="subtle"
+              onClick={handleCloseDeleteModal}
+              data-cy="cancel-delete-button"
+            >
               Cancel
             </Button>
-            <Button color="red" onClick={handleDeleteChannel}>
+            <Button color="red" onClick={handleDeleteChannel} data-cy="confirm-delete-button">
               Delete Channel
             </Button>
           </Group>

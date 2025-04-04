@@ -101,13 +101,14 @@ export function RatingButtons({
           size="sm"
           aria-label="Upvote"
           className={userRating?.isPositive ? classes.activeUpvote : classes.upvote}
+          data-cy="upvote-button"
         >
           <span role="img" aria-label="Thumbs up">
             👍
           </span>
         </ActionIcon>
       </Tooltip>
-      <Text size="sm" className={classes.ratingCount}>
+      <Text size="sm" className={classes.ratingCount} data-cy="positive-count">
         {localPositiveCount}
       </Text>
 
@@ -120,13 +121,14 @@ export function RatingButtons({
           size="sm"
           aria-label="Downvote"
           className={userRating?.isPositive === false ? classes.activeDownvote : classes.downvote}
+          data-cy="downvote-button"
         >
           <span role="img" aria-label="Thumbs down">
             👎
           </span>
         </ActionIcon>
       </Tooltip>
-      <Text size="sm" className={classes.ratingCount}>
+      <Text size="sm" className={classes.ratingCount} data-cy="negative-count">
         {localNegativeCount}
       </Text>
     </Group>

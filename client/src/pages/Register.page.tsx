@@ -46,6 +46,8 @@ export function RegisterPage() {
         title: 'Success',
         message: 'Your account has been created successfully',
         color: 'green',
+        id: 'register-success',
+        'data-cy': 'notification-success',
       });
     } catch (error) {
       let message = 'Registration failed';
@@ -56,6 +58,8 @@ export function RegisterPage() {
         title: 'Error',
         message,
         color: 'red',
+        id: 'register-error',
+        'data-cy': 'notification-error',
       });
     } finally {
       setIsLoading(false);
@@ -65,8 +69,8 @@ export function RegisterPage() {
   return (
     <Container size="xs" py={40}>
       <Paper radius="md" p="xl" withBorder>
-        <Title order={2} ta="center" mt="md" mb={30}>
-          Register for Programming Channel
+        <Title order={2} ta="center" mt="md" mb={30} data-cy="register-title">
+          Register for DevBoard
         </Title>
 
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -74,6 +78,7 @@ export function RegisterPage() {
             label="Username"
             placeholder="Your username"
             required
+            data-cy="username-input"
             {...form.getInputProps('username')}
           />
           <TextInput
@@ -81,6 +86,7 @@ export function RegisterPage() {
             placeholder="Your display name"
             required
             mt="md"
+            data-cy="display-name-input"
             {...form.getInputProps('displayName')}
           />
           <PasswordInput
@@ -88,6 +94,7 @@ export function RegisterPage() {
             placeholder="Your password"
             required
             mt="md"
+            data-cy="password-input"
             {...form.getInputProps('password')}
           />
           <PasswordInput
@@ -95,6 +102,7 @@ export function RegisterPage() {
             placeholder="Confirm your password"
             required
             mt="md"
+            data-cy="confirm-password-input"
             {...form.getInputProps('confirmPassword')}
           />
 
@@ -102,7 +110,7 @@ export function RegisterPage() {
             <Text component={Link} to="/login" size="sm">
               Already have an account? Login
             </Text>
-            <Button type="submit" loading={isLoading}>
+            <Button type="submit" loading={isLoading} data-cy="register-submit-button">
               Register
             </Button>
           </Group>

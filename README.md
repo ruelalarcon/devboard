@@ -1,4 +1,4 @@
-# Programming Channel Application
+# DevBoard Application
 
 This project runs both the frontend and backend on the same port (3000).
 
@@ -26,7 +26,7 @@ This project runs both the frontend and backend on the same port (3000).
 npm install
 ```
 
-2. Create a `.env` file in the server directory with the following variables:
+2. Create a `.env` file in the `server/` directory with the following variables:
 
 ```
 DB_HOST=localhost
@@ -38,13 +38,7 @@ SESSION_SECRET=your_session_secret
 ADMIN_PASSWORD=your_admin_password
 ```
 
-3. Create the MySQL database:
-
-```sql
-CREATE DATABASE programming_channel_db;
-```
-
-4. Build the client application:
+3. Build the client application:
 
 ```bash
 npm run build
@@ -69,6 +63,33 @@ npm run dev
 The application will be available at http://localhost:3000
 
 To access the GraphQL Explorer, navigate to http://localhost:3000/graphql
+
+## Running Tests
+
+To run Jest unit tests for API testing:
+
+```bash
+npm run test:units
+```
+
+To run Cypress (E2E) integration tests via browser emulation:
+
+```bash
+npm run test:e2e
+```
+
+To run both:
+
+```bash
+npm run test
+```
+
+To watch and manually run each of the Cypress tests:
+
+```bash
+npm run cypress
+```
+This will open Cypress via Electron and allow you to watch each of the test specs in action
 
 ## Cross-Platform Compatibility
 

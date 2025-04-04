@@ -35,13 +35,15 @@ function Header({
         <Burger opened={opened} onClick={onToggle} hiddenFrom="sm" size="sm" />
         <Box visibleFrom="sm">
           <Link to="/home" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <Title order={3}>Programming Channel</Title>
+            <Title order={3} data-cy="app-title">
+              DevBoard
+            </Title>
           </Link>
         </Box>
       </Group>
       {user && (
         <Group>
-          <Group>
+          <Group data-cy="user-menu">
             <Avatar src={user.avatar} size="sm" radius="xl">
               {user.displayName[0]}
             </Avatar>
@@ -52,7 +54,13 @@ function Header({
               </Link>
             </Text>
           </Group>
-          <Button onClick={onLogout} variant="outline" color="red" size="sm">
+          <Button
+            onClick={onLogout}
+            variant="outline"
+            color="red"
+            size="sm"
+            data-cy="logout-button"
+          >
             Logout
           </Button>
         </Group>
@@ -97,6 +105,7 @@ export function AppShell({ children }: AppShellProps) {
           style={{
             borderRadius: '.25rem',
           }}
+          data-cy="nav-home"
         />
         {user && (
           <NavLink
@@ -108,6 +117,7 @@ export function AppShell({ children }: AppShellProps) {
               borderRadius: '.25rem',
               marginTop: '10px',
             }}
+            data-cy="nav-profile"
           />
         )}
         <NavLink
@@ -119,6 +129,7 @@ export function AppShell({ children }: AppShellProps) {
             borderRadius: '.25rem',
             marginTop: '10px',
           }}
+          data-cy="nav-search"
         />
       </MantineAppShell.Navbar>
 

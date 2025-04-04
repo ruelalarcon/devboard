@@ -168,26 +168,38 @@ export function ChannelDetailPage() {
     <AppShell>
       <Container>
         <Group mb="md">
-          <Button component={Link} to="/home" variant="subtle" size="sm">
+          <Button component={Link} to="/home" variant="subtle" size="sm" data-cy="back-button">
             ← Back to Home
           </Button>
           {isAdmin && (
-            <Button color="red" variant="subtle" size="sm" onClick={handleOpenDeleteModal}>
+            <Button
+              color="red"
+              variant="subtle"
+              size="sm"
+              onClick={handleOpenDeleteModal}
+              data-cy="admin-delete-channel"
+            >
               Delete Channel
             </Button>
           )}
         </Group>
 
-        <Paper withBorder p="md" mb="xl">
-          <Title order={2}>{channel.name}</Title>
-          {channel.description && <Text mt="xs">{channel.description}</Text>}
-          <Text size="sm" c="dimmed" mt="xs">
+        <Paper withBorder p="md" mb="xl" data-cy="channel-header">
+          <Title order={2} data-cy="channel-title">
+            {channel.name}
+          </Title>
+          {channel.description && (
+            <Text mt="xs" data-cy="channel-description">
+              {channel.description}
+            </Text>
+          )}
+          <Text size="sm" c="dimmed" mt="xs" data-cy="channel-creator">
             Created by <Link to={`/user/${channel.creator.id}`}>{channel.creator.displayName}</Link>{' '}
             on {formatDate(channel.createdAt)}
           </Text>
         </Paper>
 
-        <Title order={3} mb="md">
+        <Title order={3} mb="md" data-cy="messages-section-title">
           Messages
         </Title>
 
@@ -197,17 +209,18 @@ export function ChannelDetailPage() {
             initialContent=""
             isLoading={createLoading || contentLoading}
             placeholder="Type your message here..."
+            data-cy="channel-message-form"
           />
         </Paper>
 
         {messagesLoading ? (
           <Loader />
         ) : messages.length === 0 ? (
-          <Text c="dimmed" ta="center">
+          <Text c="dimmed" ta="center" data-cy="no-messages">
             No messages yet. Be the first to post!
           </Text>
         ) : (
-          <Stack gap="lg">
+          <Stack gap="lg" data-cy="message-list">
             {messages.map((message: Message) => (
               <Box key={message.id}>
                 <ContentCard
@@ -222,7 +235,13 @@ export function ChannelDetailPage() {
                   onRatingChange={() => {}}
                   onDelete={() => handleDeleteMessage(message.id)}
                 >
-                  <Button component={Link} to={`/message/${message.id}`} variant="subtle" size="xs">
+                  <Button
+                    component={Link}
+                    to={`/message/${message.id}`}
+                    variant="subtle"
+                    size="xs"
+                    data-cy="view-replies-button"
+                  >
                     View Replies
                   </Button>
                 </ContentCard>
@@ -237,15 +256,20 @@ export function ChannelDetailPage() {
           onClose={handleCloseDeleteModal}
           title="Confirm Channel Deletion"
           centered
+          data-cy="delete-channel-modal"
         >
           <Text mb="md">
             Are you sure you want to delete this channel? This action cannot be undone.
           </Text>
           <Group justify="flex-end">
-            <Button variant="subtle" onClick={handleCloseDeleteModal}>
+            <Button
+              variant="subtle"
+              onClick={handleCloseDeleteModal}
+              data-cy="cancel-delete-channel"
+            >
               Cancel
             </Button>
-            <Button color="red" onClick={handleDeleteChannel}>
+            <Button color="red" onClick={handleDeleteChannel} data-cy="confirm-delete-channel">
               Delete Channel
             </Button>
           </Group>

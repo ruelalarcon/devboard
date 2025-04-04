@@ -66,16 +66,18 @@ export function UserCard({
         )}
         <div>
           <Link to={`/user/${id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-            <Title order={compact ? 5 : 4}>{displayName}</Title>
-            <Text size="sm" c="dimmed">
+            <Title order={compact ? 5 : 4} data-cy="user-card-display-name">
+              {displayName}
+            </Title>
+            <Text size="sm" c="dimmed" data-cy="user-card-username">
               @{username}
             </Text>
           </Link>
-          <Text size="sm" c="dimmed">
+          <Text size="sm" c="dimmed" data-cy="user-card-joined-on">
             Joined on {formatDate(createdAt)}
           </Text>
           {isAdmin && (
-            <Text size="sm" c="blue" fw={500}>
+            <Text size="sm" c="blue" fw={500} data-cy="user-card-admin-badge">
               Administrator
             </Text>
           )}

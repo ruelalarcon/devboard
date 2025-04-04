@@ -19,7 +19,7 @@ const resolvers = require("./graphql/resolvers");
 const uploadRoutes = require("./routes/uploadRoutes");
 
 // Import database models
-const db = require("./models");
+let db = require("./models");
 
 // Create Express app
 const app = express();
@@ -34,7 +34,7 @@ const corsOptions = {
 // Configure session middleware
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || "test-session-secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -61,7 +61,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(express.static(path.join(__dirname, "public")));
 
 // Create Apollo Server
-const server = new ApolloServer({
+const apolloServer = new ApolloServer({
   typeDefs,
   resolvers,
   plugins: [
@@ -76,14 +76,26 @@ const server = new ApolloServer({
 
 // Function to initialize the server
 async function startServer() {
+  // In test mode, we might need to get a fresh database connection
+  if (process.env.NODE_ENV === "test") {
+    // Clear the model cache to get a fresh connection
+    Object.keys(require.cache).forEach((key) => {
+      if (key.includes("/models/")) {
+        delete require.cache[key];
+      }
+    });
+    // Reload the models
+    db = require("./models");
+  }
+
   // Start Apollo Server
-  await server.start();
+  await apolloServer.start();
 
   // Apply Apollo middleware to Express app
   app.use(
     "/graphql",
     express.json(),
-    expressMiddleware(server, {
+    expressMiddleware(apolloServer, {
       context: async ({ req }) => {
         // Pass database models and request to resolvers
         return {
@@ -95,19 +107,21 @@ async function startServer() {
     })
   );
 
-  // Create database tables if they don't exist
-  await db.sequelize.sync();
+  // Create database tables if they don't exist - skip in test mode
+  if (process.env.NODE_ENV !== "test") {
+    await db.sequelize.sync();
 
-  // Create admin account if it doesn't exist
-  const adminExists = await db.User.findOne({ where: { username: "admin" } });
-  if (!adminExists) {
-    await db.User.create({
-      username: "admin",
-      password: process.env.ADMIN_PASSWORD,
-      displayName: "Administrator",
-      isAdmin: true,
-    });
-    console.log("Admin account created");
+    // Create admin account if it doesn't exist
+    const adminExists = await db.User.findOne({ where: { username: "admin" } });
+    if (!adminExists) {
+      await db.User.create({
+        username: "admin",
+        password: process.env.ADMIN_PASSWORD || "test_admin_password", // Use default for testing
+        displayName: "Administrator",
+        isAdmin: true,
+      });
+      console.log("Admin account created");
+    }
   }
 
   // Add route to serve the React app
@@ -126,10 +140,13 @@ async function startServer() {
 
   // Start the server
   const PORT = process.env.PORT || 3000;
-  await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
-  console.log(`Server running at http://localhost:${PORT}`);
-  console.log(`GraphQL endpoint: http://localhost:${PORT}/graphql`);
-  console.log(`REST API endpoints available at http://localhost:${PORT}/api`);
+  const serverInstance = httpServer.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`GraphQL endpoint: http://localhost:${PORT}/graphql`);
+    console.log(`REST API endpoints available at http://localhost:${PORT}/api`);
+  });
+
+  return serverInstance;
 }
 
 // Handle errors
@@ -141,7 +158,12 @@ process.on("unhandledRejection", (error) => {
   console.error("Unhandled Rejection:", error);
 });
 
-// Start the server
-startServer().catch((error) => {
-  console.error("Error starting server:", error);
-});
+// Start the server only if not being imported for testing
+if (require.main === module) {
+  startServer().catch((error) => {
+    console.error("Error starting server:", error);
+  });
+}
+
+// Export for testing
+module.exports = { app, httpServer, startServer };

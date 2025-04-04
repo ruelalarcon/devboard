@@ -33,19 +33,27 @@ export function ChannelCard({
 }: ChannelCardProps) {
   const nameElement = withLink ? (
     <Link to={`/channel/${id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-      <Title order={compact ? 5 : 4}>{name}</Title>
+      <Title order={compact ? 5 : 4} data-cy="channel-detail-title">
+        {name}
+      </Title>
     </Link>
   ) : (
-    <Title order={compact ? 5 : 4}>{name}</Title>
+    <Title order={compact ? 5 : 4} data-cy="channel-detail-title">
+      {name}
+    </Title>
   );
 
   return (
-    <Card withBorder shadow="sm" p={compact ? 'md' : 'lg'} radius="md">
+    <Card withBorder shadow="sm" p={compact ? 'md' : 'lg'} radius="md" data-cy="channel-item">
       <Group justify="space-between">
         <div>
           {nameElement}
           {description && (
-            <Text c={compact ? 'dimmed' : undefined} size={compact ? 'sm' : undefined}>
+            <Text
+              c={compact ? 'dimmed' : undefined}
+              size={compact ? 'sm' : undefined}
+              data-cy="channel-detail-description"
+            >
               {description}
             </Text>
           )}
@@ -71,12 +79,18 @@ export function ChannelCard({
               to={`/channel/${id}`}
               variant="outline"
               size={compact ? 'xs' : 'sm'}
+              data-cy="view-channel-button"
             >
               View Channel
             </Button>
           )}
           {showAdminControls && onDeleteChannel && (
-            <Button color="red" size={compact ? 'xs' : 'sm'} onClick={onDeleteChannel}>
+            <Button
+              color="red"
+              size={compact ? 'xs' : 'sm'}
+              onClick={onDeleteChannel}
+              data-cy="delete-channel-button"
+            >
               Delete Channel
             </Button>
           )}

@@ -40,6 +40,8 @@ export function LoginPage() {
         title: 'Success',
         message: 'You have been logged in successfully',
         color: 'green',
+        id: 'login-success',
+        'data-cy': 'notification-success',
       });
     } catch (error) {
       let message = 'Login failed';
@@ -50,6 +52,8 @@ export function LoginPage() {
         title: 'Error',
         message,
         color: 'red',
+        id: 'login-error',
+        'data-cy': 'notification-error',
       });
     } finally {
       setIsLoading(false);
@@ -59,8 +63,8 @@ export function LoginPage() {
   return (
     <Container size="xs" py={40}>
       <Paper radius="md" p="xl" withBorder>
-        <Title order={2} ta="center" mt="md" mb={30}>
-          Login to Programming Channel
+        <Title order={2} ta="center" mt="md" mb={30} data-cy="login-title">
+          Login to DevBoard
         </Title>
 
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -68,6 +72,7 @@ export function LoginPage() {
             label="Username"
             placeholder="Your username"
             required
+            data-cy="username-input"
             {...form.getInputProps('username')}
           />
           <PasswordInput
@@ -75,6 +80,7 @@ export function LoginPage() {
             placeholder="Your password"
             required
             mt="md"
+            data-cy="password-input"
             {...form.getInputProps('password')}
           />
 
@@ -82,7 +88,7 @@ export function LoginPage() {
             <Text component={Link} to="/register" size="sm">
               Don't have an account? Register
             </Text>
-            <Button type="submit" loading={isLoading}>
+            <Button type="submit" loading={isLoading} data-cy="login-submit-button">
               Login
             </Button>
           </Group>
