@@ -1,6 +1,8 @@
 # DevBoard Application
 
-This project runs both the frontend and backend on the same port (3000).
+> Created as a solo project for CMPT 353 @ USASK
+
+A simple devforum and board with images and discord-esque markdown + codeblock support, built in JavaScript and Typescript using NodeJS, GraphQL and React.
 
 ## Features
 
