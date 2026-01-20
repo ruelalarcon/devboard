@@ -4,6 +4,19 @@
 
 A simple devforum and board with images and discord-esque markdown + codeblock support, built in JavaScript and Typescript using NodeJS, GraphQL and React.
 
+---
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=uhpXc6PrYU4" target="_blank">
+    <img src="https://github.com/user-attachments/assets/32c0c732-4f7f-4dbc-8c64-a9b791f3b372" alt="A+Plus Overview" width="560"/>
+    <br>
+    <b>Watch the Overview</b>
+  </a>
+  <br>
+  <br>
+  Check out the video overview - one of the deliverables required for the project
+</p>
+
 ## Features
 
 - User accounts and authentication using express-session
